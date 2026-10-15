@@ -1,0 +1,28 @@
+@layer components {
+  .accordion {
+    width: 100%;
+  }
+
+  .accordion-title {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    background-color: var(--white);
+  }
+  .accordion-title:focus-visible {
+    outline: 2px solid var(--ea-color-blue50);
+    outline-offset: -2px;
+  }
+
+  .accordion-title,
+  .accordion-content {
+    padding: 1rem 1.5rem;
+  }
+
+  .accordion-content {
+    background-color: var(--nova-color-gray05);
+  }
+}

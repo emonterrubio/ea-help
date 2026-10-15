@@ -1,0 +1,55 @@
+/* EA brand typefaces. Each weight is registered as its own family (legacy convention). */
+
+@font-face {
+  font-family: 'ElectronicArtsDisplayBold';
+  src: url('../assets/fonts/ElectronicArtsDisplay-Bold.woff2') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'ElectronicArtsDisplayLight';
+  src: url('../assets/fonts/ElectronicArtsDisplay-Light.woff2') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'ElectronicArtsDisplayRegular';
+  src: url('../assets/fonts/ElectronicArtsDisplay-Regular.woff2') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'ElectronicArtsTextBold';
+  src: url('../assets/fonts/ElectronicArtsText-Bold.woff2') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'ElectronicArtsTextBoldItalic';
+  src: url('../assets/fonts/ElectronicArtsText-BoldItalic.woff2') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'ElectronicArtsTextItalic';
+  src: url('../assets/fonts/ElectronicArtsText-Italic.woff2') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'ElectronicArtsTextLight';
+  src: url('../assets/fonts/ElectronicArtsText-Light.woff2') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'ElectronicArtsTextLightItalic';
+  src: url('../assets/fonts/ElectronicArtsText-LightItalic.woff2') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'ElectronicArtsTextRegular';
+  src: url('../assets/fonts/ElectronicArtsText-Regular.woff2') format('woff2');
+  font-display: swap;
+}

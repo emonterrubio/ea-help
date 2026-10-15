@@ -1,0 +1,109 @@
+/* Browser resets carried over from the legacy app. Tailwind preflight is loaded
+   after this file and wins on any conflicting declaration, as it did before. */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+div,
+object,
+iframe,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+a,
+abbr,
+acronym,
+address,
+code,
+del,
+dfn,
+em,
+img,
+q,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+textarea,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 1rem;
+  font-family: Arial, Helvetica, sans-serif;
+  vertical-align: baseline;
+}
+
+a {
+  color: unset;
+  text-decoration: none;
+}
+
+html,
+body {
+  min-height: 100%;
+  width: 100%;
+  -webkit-text-size-adjust: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  background-color: rgb(250, 250, 250);
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-size-adjust: 100%;
+}
+
+ul,
+ol,
+li {
+  list-style: none;
+}
+
+select {
+  background: transparent;
+  width: 168px;
+  padding: 5px;
+  font-size: 16px;
+  line-height: 1;
+  border: 0;
+  border-radius: 0;
+  height: 34px;
+  appearance: none;
+  color: #000;
+}
+
+span {
+  display: inline;
+}
+
+tr:nth-child(even) {
+  background-color: var(--nova-color-gray05);
+}

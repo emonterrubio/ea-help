@@ -1,0 +1,39 @@
+@layer components {
+  .alert {
+    position: relative;
+    font-family: 'ElectronicArtsTextRegular', sans-serif;
+    line-height: normal;
+    border: none;
+    outline: none;
+    overflow: hidden;
+    border-radius: 0.25rem;
+    display: flex;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  }
+  .alert p {
+    color: var(--nova-color-gray90);
+  }
+  .alert-title {
+    font-family: 'ElectronicArtsTextBold';
+    line-height: normal;
+    border: none;
+  }
+
+  /* Severities */
+  .error {
+    color: var(--nova-color-coral50);
+    background-color: var(--white);
+  }
+  .warning {
+    color: var(--nova-color-warning60);
+    background-color: var(--white);
+  }
+  .info {
+    color: var(--ea-color-blue50);
+    background-color: var(--white);
+  }
+  .success {
+    color: var(--ea-color-green60);
+    background-color: var(--white);
+  }
+}

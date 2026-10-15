@@ -1,0 +1,6 @@
+@layer components {
+  .thumbnail:hover .overlay {
+    opacity: 0.7;
+    transition: opacity 0.15s ease-in-out;
+  }
+}

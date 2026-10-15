@@ -1,0 +1,75 @@
+/* Design tokens. See DESIGN.md for usage guidance. */
+:root {
+  /* Primary coral */
+  --nova-color-coral10: #ffe0e0;
+  --nova-color-coral20: #ffadad;
+  --nova-color-coral30: #ff7a7a;
+  --nova-color-coral40: #ff4747;
+  --nova-color-coral50: #ff1414;
+  --nova-color-coral60: #e00000;
+  --nova-color-coral70: #ad0000;
+  --nova-color-coral80: #7a0000;
+  --nova-color-coral90: #470000;
+
+  /* Grayscale */
+  --nova-color-gray05: #f8fafc;
+  --nova-color-gray10: #f2f2f2;
+  --nova-color-gray20: #d9d9d9;
+  --nova-color-gray30: #bfbfbf;
+  --nova-color-gray40: #a6a6a6;
+  --nova-color-gray50: #8c8c8c;
+  --nova-color-gray60: #737373;
+  --nova-color-gray70: #595959;
+  --nova-color-gray80: #404040;
+  --nova-color-gray90: #262626;
+
+  /* EA blue */
+  --ea-color-blue05: #d8e5f8;
+  --ea-color-blue10: #bfd2f8;
+  --ea-color-blue20: #91b2f3;
+  --ea-color-blue30: #6392ee;
+  --ea-color-blue40: #3471e9;
+  --ea-color-blue50: #1757d4;
+  --ea-color-blue60: #1244a6;
+  --ea-color-blue70: #0d3178;
+  --ea-color-blue80: #081e4a;
+  --ea-color-blue90: #030b1c;
+
+  /* EA yellow */
+  --ea-color-yellow10: #fcf3cf;
+  --ea-color-yellow20: #f9e89f;
+  --ea-color-yellow30: #f6dc6f;
+  --ea-color-yellow40: #f3d03d;
+  --ea-color-yellow50: #f0c50f;
+  --ea-color-yellow60: #c09d0c;
+  --ea-color-yellow70: #907609;
+  --ea-color-yellow80: #907609;
+  --ea-color-yellow90: #302703;
+
+  /* EA green */
+  --ea-color-green10: #d5f1cb;
+  --ea-color-green20: #b5e6a3;
+  --ea-color-green30: #94db7b;
+  --ea-color-green40: #75d054;
+  --ea-color-green50: #58bc34;
+  --ea-color-green60: #459429;
+  --ea-color-green70: #336c1e;
+  --ea-color-green80: #204413;
+  --ea-color-green90: #0d1c08;
+
+  /* Feedback */
+  --nova-color-warning10: #fff7e5;
+  --nova-color-warning20: #ffe5b3;
+  --nova-color-warning30: #ffd480;
+  --nova-color-warning40: #ffc34d;
+  --nova-color-warning50: #ffb31a;
+  --nova-color-warning60: #e69900;
+  --nova-color-warning70: #b37700;
+  --nova-color-warning80: #805500;
+  --nova-color-warning90: #4d3300;
+
+  /* Utility */
+  --black: #202124;
+  --white: #ffffff;
+  --link: #0074e4;
+}

@@ -1,0 +1,6 @@
+@layer components {
+  /* Background helpers (used by banners via the `color` prop) */
+  .ea-color-blue60 {
+    background-color: var(--ea-color-blue60);
+  }
+}

@@ -1,0 +1,75 @@
+@layer components {
+  .chip {
+    font-family: 'ElectronicArtsDisplayRegular', sans-serif;
+    line-height: normal;
+    letter-spacing: 0.05rem;
+    font-weight: normal;
+    align-items: center;
+    text-align: center;
+    display: inline-flex;
+    padding: 0.25rem 0.5rem;
+    border: none;
+    outline: none;
+    overflow: hidden;
+    cursor: pointer;
+    border-radius: 0.75rem;
+  }
+  .chip:focus-visible {
+    outline: 2px solid var(--ea-color-blue50);
+    outline-offset: 2px;
+  }
+
+  .chip-gray {
+    background-color: var(--nova-color-gray10);
+    color: inherit;
+  }
+  .chip-gray:hover {
+    background-color: var(--nova-color-gray20);
+  }
+
+  .chip-blue {
+    background-color: var(--ea-color-blue50);
+    color: var(--white);
+  }
+  .chip-blue:hover {
+    background-color: var(--ea-color-blue60);
+  }
+
+  .chip-green {
+    background-color: var(--ea-color-green50);
+    color: var(--white);
+  }
+  .chip-green:hover {
+    background-color: var(--ea-color-green60);
+  }
+
+  .chip-yellow {
+    background-color: var(--ea-color-yellow50);
+    color: var(--white);
+  }
+  .chip-yellow:hover {
+    background-color: var(--ea-color-yellow60);
+  }
+
+  .chip-red {
+    background-color: var(--nova-color-coral60);
+    color: var(--white);
+  }
+  .chip-red:hover {
+    background-color: var(--nova-color-coral70);
+  }
+
+  /* Sizes */
+  .chip-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.625rem;
+  }
+  .chip-md {
+    padding: 0.25rem 0.625rem;
+    font-size: 0.75rem;
+  }
+  .chip-lg {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.875rem;
+  }
+}

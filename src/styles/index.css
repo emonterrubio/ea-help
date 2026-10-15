@@ -1,0 +1,25 @@
+/*
+ * Global stylesheet entry. Cascade order (see DESIGN.md → "Cascade order"):
+ *
+ * 1. Fonts, tokens and element resets come first so Tailwind preflight overrides them,
+ *    matching the legacy app, where the Tailwind Play CDN injected its styles last.
+ * 2. Component classes live in `@layer components`: after preflight, before utilities.
+ *    Utilities still win over component classes, exactly as they did in the legacy app.
+ */
+@import './fonts.css';
+@import './tokens.css';
+@import './reset.css';
+@import './components/alert.css';
+@import './components/button.css';
+@import './components/card.css';
+@import './components/chip.css';
+@import './components/sidebar.css';
+@import './components/search.css';
+@import './components/accordion.css';
+@import './components/game-tile.css';
+@import './components/typography.css';
+@import './components/palette.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

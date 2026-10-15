@@ -1,0 +1,48 @@
+@layer components {
+  /* Typeface helper classes */
+  .electronicArtsTextLight {
+    font-family: ElectronicArtsTextLight;
+  }
+  .electronicArtsTextRegular {
+    font-family: ElectronicArtsTextRegular;
+    font-weight: 400;
+  }
+  .electronicArtsTextBold {
+    font-family: ElectronicArtsTextBold;
+  }
+  .electronicArtsDisplayLight {
+    font-family: ElectronicArtsDisplayLight;
+  }
+  .electronicArtsDisplayRegular {
+    font-family: ElectronicArtsDisplayRegular;
+  }
+  .electronicArtsDisplayBold {
+    font-family: ElectronicArtsDisplayBold;
+  }
+
+  /* Type scale */
+  .body-default {
+    font-size: 1rem !important;
+    line-height: 1.25rem !important;
+    letter-spacing: 0.025rem !important;
+    font-family: ElectronicArtsTextRegular;
+    font-weight: normal;
+  }
+
+  .body-small {
+    font-size: 0.875rem !important;
+    line-height: 1.25rem !important;
+    letter-spacing: 0.025rem !important;
+    font-family: ElectronicArtsTextRegular;
+    font-weight: normal;
+  }
+
+  .eyebrow-default {
+    font-size: 0.75rem !important;
+    line-height: 1.5rem !important;
+    letter-spacing: 0.05rem !important;
+    font-family: ElectronicArtsTextRegular;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+}
