@@ -43,6 +43,15 @@ src/lib/             pure, unit-tested helpers
 src/data/            typed fixtures (no JSX, no React imports; icons are IconType refs)
 src/types/domain.ts  all domain types
 src/styles/          tokens, reset, component CSS (in @layer components), Tailwind entry
+
+# v3 AI layer (docs/AI_LAYER_PLAN.md)
+src/features/flags/      useAiLayer(): ?ai=on|off + localStorage; off = untouched v1
+src/features/agent/      Help Agent UI: provider/reducer, <dialog> panel, launcher, cards
+src/features/demo-controls/  prototype-only toggle/reset dock (data-demo-chrome)
+src/agent/protocol.ts    event contract shared by the demo and live engines
+src/agent/policy/        deterministic rules: autonomy levels L0–L3, eligibility, risk
+src/agent/demo/          scenario registry, intent router, scripted demo engine
+src/services/ea-api/     mock EA Help APIs + persisted demo store (reset from the dock)
 ```
 
 Import with the `@/` alias (maps to `src/`).
@@ -64,6 +73,18 @@ Import with the `@/` alias (maps to `src/`).
 - **Types:** no `any`, no non-null assertions (`!`). Narrow with guards instead.
 - **Tests:** colocate `*.test.ts(x)` next to the code. Pure helpers get unit tests.
   Interactive components get Testing Library tests that query by role or label.
+
+## AI layer rules
+
+- With the AI layer **off**, the app must stay pixel-identical to v1. Gate every new
+  surface behind `useAiLayer()`. Prototype-only UI carries `data-demo-chrome`.
+- The UI renders only `AgentEvent`s (`src/agent/protocol.ts`). New agent behavior goes
+  into an engine, never into components.
+- Eligibility and risk decisions live in `src/agent/policy/` as pure, tested functions.
+  The model never decides whether an account change is allowed, and L2 actions always
+  need a player tap.
+- Demo scenarios are deep-linkable (`/?scenario=<id>`). Every scenario's sample prompt
+  must route to itself (enforced by `router.test.ts`). `/demo` lists them (unlisted route).
 
 ## Gotchas
 

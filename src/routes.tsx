@@ -65,6 +65,8 @@ export const routes: RouteObject[] = [
         ],
       },
       { path: 'account', lazy: async () => ({ Component: (await import('@/pages/AccountPage')).AccountPage }) },
+      // Unlisted prototype hub for reviewers (not in navigation).
+      { path: 'demo', lazy: async () => ({ Component: (await import('@/pages/DemoHubPage')).DemoHubPage }) },
       { path: '*', lazy: async () => ({ Component: (await import('@/pages/NotFoundPage')).NotFoundPage }) },
     ],
   },

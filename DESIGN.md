@@ -130,7 +130,25 @@ Rules of thumb:
 - Focus styles: buttons, chips and accordion headers show a `:focus-visible` outline.
 - Respect `prefers-reduced-motion` for drawer transitions.
 
-## 8. Front-end architecture
+## 8. AI layer (v3) patterns
+
+The Help Agent follows the PRD's agentic design principles. Reuse these pieces:
+
+| Pattern          | Component                                             | Rule                                                                              |
+| ---------------- | ----------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Identify as AI   | `AiBadge`, panel subtitle, first message              | Always visible; the agent never imitates an advisor                               |
+| Show the work    | `StatusLine`                                          | One short present-tense line per tool call; spinner while active, check when done |
+| Explain the why  | `AgentMessage` citations                              | Every answer or action cites an article, purchase record or policy                |
+| Autonomy         | `AutonomyBadge` (L0 slate, L1 sky, L2 amber, L3 rose) | Shown on every agent response                                                     |
+| Escape hatch     | "Talk to a person" in the panel header                | Never hidden or disabled except while a request is running                        |
+| Warm handoff     | `HandoffNotice`                                       | States the advisor is a person and shows what they already know                   |
+| Context pre-fill | `ContextStrip`                                        | Shows what the agent already knows so the player never re-enters it               |
+
+The panel is a native `<dialog>` opened with `showModal()`: a side sheet ≥640px, full
+screen below. Focus is contained, Esc closes it, and focus returns to the launcher.
+The conversation is an `aria-live` log.
+
+## 9. Front-end architecture
 
 ```
 src/
