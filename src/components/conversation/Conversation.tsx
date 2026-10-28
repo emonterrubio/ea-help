@@ -35,8 +35,8 @@ const ConversationEntry = ({ message }: { message: ConversationMessage }) => {
   );
 };
 
-/** Reply form plus message history for an open support case. */
-export const Conversation = () => (
+/** Reply form for an open support case (placeholder actions). */
+export const ReplyForm = () => (
   <>
     <div className="my-4">
       <TextField label="Summary" name="summary" />
@@ -57,15 +57,27 @@ export const Conversation = () => (
         </Button>
       </div>
     </div>
-    <section aria-labelledby="conversation-history-heading">
-      <h4 id="conversation-history-heading" className="mb-4 electronicArtsTextBold text-base text-gray-800">
-        Conversation history
-      </h4>
-      <ul>
-        {conversation.map((message) => (
-          <ConversationEntry key={message.id} message={message} />
-        ))}
-      </ul>
-    </section>
+  </>
+);
+
+/** v1 message history for an open support case. */
+const ConversationHistory = () => (
+  <section aria-labelledby="conversation-history-heading">
+    <h4 id="conversation-history-heading" className="mb-4 electronicArtsTextBold text-base text-gray-800">
+      Conversation history
+    </h4>
+    <ul>
+      {conversation.map((message) => (
+        <ConversationEntry key={message.id} message={message} />
+      ))}
+    </ul>
+  </section>
+);
+
+/** Reply form plus message history for an open support case (v1). */
+export const Conversation = () => (
+  <>
+    <ReplyForm />
+    <ConversationHistory />
   </>
 );

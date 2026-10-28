@@ -1,6 +1,10 @@
 import { listIncidents } from '@/services/ea-api/api';
+import { createAgentCase } from '@/services/ea-api/cases';
 import { INCIDENT_STATUS_LABELS, incidentExpectation } from '@/services/ea-api/incidentStatus';
-import type { Incident } from '@/services/ea-api/types';
+import type { CaseDraftInput, Incident } from '@/services/ea-api/types';
+import { advisorGreeting, detectSentiment, draftCase } from '../casework';
+import { treeFor } from '../diagnostics/trees';
+import type { DiagnosticResult } from '../diagnostics/types';
 import { answerFor, tokenize } from '../knowledge/search';
 import { AUTONOMY_LEVELS } from '../policy/autonomy';
 import type { AgentContext, AgentEngine, AgentEvent, AgentRequest } from '../protocol';
@@ -116,31 +120,120 @@ const scenarioPreview = (scenario: Scenario): AgentEvent => {
   };
 };
 
-const handoffEvent = (request: AgentRequest): AgentEvent => {
-  const lastIssue = request.history.at(-1);
-  return {
+/** Creates the case and hands it to a person, who starts from the agent's summary (L3). */
+async function* handOff(draft: CaseDraftInput, context: AgentContext, signal: AbortSignal) {
+  yield status('Creating your case…');
+  await pause(signal);
+  const created = await createAgentCase(draft);
+  yield status('Connecting you with an advisor…');
+  await pause(signal);
+  yield {
     type: 'handoff',
     id: nextId(),
-    advisorName: 'Jordan',
-    summary: lastIssue
-      ? `${request.context.playerName} (${request.context.platform}) asked for help with: "${lastIssue}".`
-      : `${request.context.playerName} (${request.context.platform}) asked to talk to a person.`,
-  };
-};
+    advisorName: draft.advisorName,
+    summary: draft.summary,
+    caseId: created.id,
+    caseNumber: created.case,
+    greeting: advisorGreeting(draft, context),
+  } satisfies AgentEvent;
+}
+
+/** L1: guided diagnostics from an authored decision tree for the player's game and platform. */
+async function* guidedDiagnostics(text: string, context: AgentContext, signal: AbortSignal) {
+  const mentioned = new Set(tokenize(text));
+  const game = context.ownedGames.find((owned) =>
+    tokenize(owned.title).some((token) => !/^\d+$/.test(token) && mentioned.has(token)),
+  );
+  const tree = game ? treeFor(game.id, context.platform) : undefined;
+  if (!game || !tree) {
+    yield {
+      type: 'message',
+      id: nextId(),
+      level: 'L0',
+      text: game
+        ? `I don't have guided steps for ${game.title} on ${context.platform} yet, so I won't make any up. Tap "Talk to a person" and I'll pass this to an advisor.`
+        : 'Which game is it? For example: "Battlefield 2042 keeps crashing on my PS5."',
+    } satisfies AgentEvent;
+    return;
+  }
+  yield status(`Checking your ${game.title} setup on ${context.platform}…`);
+  await pause(signal);
+  yield {
+    type: 'message',
+    id: nextId(),
+    level: 'L1',
+    text: `You're playing ${game.title} on ${context.platform}, so I'll skip the generic advice. Two quick questions, then steps written for ${context.platform}. If a step doesn't work, say so and I'll move on.`,
+  } satisfies AgentEvent;
+  yield { type: 'card', id: nextId(), level: 'L1', card: { type: 'diagnostic', treeId: tree.id } } satisfies AgentEvent;
+}
+
+/** After the steps: celebrate a fix, or draft a case with the full diagnostic log. */
+async function* diagnosticOutcome(result: DiagnosticResult, request: AgentRequest, signal: AbortSignal) {
+  if (result.outcome === 'resolved') {
+    const fix = result.log.find((entry) => entry.outcome === 'done');
+    yield {
+      type: 'message',
+      id: nextId(),
+      level: 'L1',
+      text: `Great, glad that's sorted.${fix ? ` I noted that "${fix.title}" fixed it, in case it comes back.` : ''}`,
+    } satisfies AgentEvent;
+    return;
+  }
+  yield status('Writing up your case with everything you tried…');
+  await pause(signal);
+  const draft = draftCase(request.history, [...request.diagnostics, result], request.context);
+  yield {
+    type: 'message',
+    id: nextId(),
+    level: 'L3',
+    text: "I've run out of fixes I'm allowed to suggest, so this needs a person. I drafted the case with your answers and every step you tried, so you won't have to repeat anything. Review it, change anything you like, then send it.",
+  } satisfies AgentEvent;
+  yield {
+    type: 'card',
+    id: nextId(),
+    level: 'L3',
+    card: { type: 'case_draft', draftId: nextId(), draft },
+  } satisfies AgentEvent;
+}
 
 async function* runDemo(request: AgentRequest, signal: AbortSignal): AsyncGenerator<AgentEvent> {
   const { input, context } = request;
 
-  if (input.kind === 'talk_to_person') {
-    yield status('Summarizing our conversation for an advisor…');
-    await pause(signal);
-    yield handoffEvent(request);
-    yield { type: 'done' };
-    return;
+  switch (input.kind) {
+    case 'talk_to_person':
+      yield status('Summarizing our conversation for an advisor…');
+      await pause(signal);
+      yield* handOff(draftCase(request.history, request.diagnostics, context), context, signal);
+      yield { type: 'done' };
+      return;
+    case 'submit_case':
+      yield* handOff(input.draft, context, signal);
+      yield { type: 'done' };
+      return;
+    case 'diagnostic_result':
+      yield* diagnosticOutcome(input.result, request, signal);
+      yield { type: 'done' };
+      return;
+    case 'text':
+    case 'scenario':
+      break;
   }
 
   const scenario = input.kind === 'scenario' ? findScenario(input.scenarioId) : undefined;
   const text = input.kind === 'text' ? input.text : (scenario?.prompt ?? '');
+
+  // Safety and sentiment triggers route to a person immediately, before anything else.
+  if (detectSentiment([text]) === 'distressed' || (scenario?.id ?? routeIntent(text)) === 'escalate') {
+    yield {
+      type: 'message',
+      id: nextId(),
+      level: 'L3',
+      text: "I'm sorry this has been so frustrating. I'm getting you to a person right now and passing along everything so far, so you won't have to explain it again.",
+    } satisfies AgentEvent;
+    yield* handOff(draftCase(request.history, request.diagnostics, context), context, signal);
+    yield { type: 'done' };
+    return;
+  }
 
   yield status('Understanding your request…');
   await pause(signal);
@@ -149,6 +242,9 @@ async function* runDemo(request: AgentRequest, signal: AbortSignal): AsyncGenera
   switch (scenarioId) {
     case 'known-issue':
       yield* knownIssue(text, context, signal);
+      break;
+    case 'diagnostics':
+      yield* guidedDiagnostics(text, context, signal);
       break;
     case 'quick-answer':
     case null:

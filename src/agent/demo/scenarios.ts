@@ -33,6 +33,11 @@ export interface Scenario {
   phase: 1 | 2 | 3;
 }
 
+/** Latest build phase that has shipped (docs/AI_LAYER_PLAN.md). */
+export const CURRENT_PHASE = 2;
+
+export const isScenarioAvailable = (scenario: Scenario): boolean => scenario.phase <= CURRENT_PHASE;
+
 export const SCENARIOS: Scenario[] = [
   {
     id: 'quick-answer',

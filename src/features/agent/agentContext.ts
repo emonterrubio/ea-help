@@ -1,6 +1,8 @@
 import { createContext, useContext } from 'react';
 import type { AgentContext, AgentMode } from '@/agent/protocol';
 import type { ScenarioId } from '@/agent/demo/scenarios';
+import type { DiagnosticResult } from '@/agent/diagnostics/types';
+import type { CaseDraftInput } from '@/services/ea-api/types';
 import { getPlayerProfile, listIncidents, listOwnedGames } from '@/services/ea-api/api';
 import type { ConversationState } from './conversation';
 
@@ -13,6 +15,10 @@ export interface HelpAgentApi {
   close: () => void;
   send: (text: string) => void;
   talkToPerson: () => void;
+  /** Reports the outcome of a guided diagnostics card back to the agent. */
+  reportDiagnostic: (result: DiagnosticResult) => void;
+  /** Sends a reviewed case draft to an advisor. */
+  submitCase: (draft: CaseDraftInput) => void;
   /** Text to place in the composer when the panel opens (e.g. a search query). */
   prefill: string;
 }

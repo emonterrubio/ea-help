@@ -1,4 +1,4 @@
-import { SCENARIOS, type Scenario } from '@/agent/demo/scenarios';
+import { isScenarioAvailable, SCENARIOS, type Scenario } from '@/agent/demo/scenarios';
 import { AUTONOMY_LEVELS } from '@/agent/policy/autonomy';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Button } from '@/components/ui/Button';
@@ -50,7 +50,9 @@ const ScenarioRow = ({ scenario, canRun, onRun }: { scenario: Scenario; canRun: 
         Run scenario
       </Button>
       <code className="body-small text-gray-500">/?scenario={scenario.id}</code>
-      <span className="body-small text-gray-500">Full flow: Phase {scenario.phase}</span>
+      <span className="body-small text-gray-500">
+        {isScenarioAvailable(scenario) ? 'Available' : `Full flow arrives in Phase ${scenario.phase}`}
+      </span>
     </div>
   </li>
 );

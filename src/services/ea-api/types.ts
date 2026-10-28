@@ -56,3 +56,38 @@ export interface Incident {
   /** Human-readable ETA, e.g. "Fix expected within 2 hours". */
   eta: string;
 }
+
+/** Where a case interaction happened; all channels share one timeline (Living Cases). */
+export type TimelineChannel = 'web' | 'ai' | 'chat' | 'email' | 'system';
+
+export interface TimelineEntry {
+  id: string;
+  channel: TimelineChannel;
+  author: string;
+  /** Display timestamp. */
+  at: string;
+  title: string;
+  body?: string;
+  details?: string[];
+}
+
+/** Plain-language case status: what's happening now, what happens next, and when. */
+export interface PlainStatus {
+  now: string;
+  next: string;
+  eta: string;
+}
+
+export type Sentiment = 'calm' | 'frustrated' | 'distressed';
+
+/** What the agent drafted and the player reviewed before sending. */
+export interface CaseDraftInput {
+  title: string;
+  summary: string;
+  gameId: string | null;
+  evidence: string[];
+  stepsTried: string[];
+  sentiment: Sentiment;
+  transcript: string[];
+  advisorName: string;
+}

@@ -15,7 +15,15 @@ const ConversationEntry = ({ item }: { item: ConversationItem }) => {
     case 'message':
       return <AgentMessage text={item.text} citations={item.citations} level={item.level} />;
     case 'handoff':
-      return <HandoffNotice advisorName={item.advisorName} summary={item.summary} />;
+      return (
+        <HandoffNotice
+          advisorName={item.advisorName}
+          summary={item.summary}
+          caseId={item.caseId}
+          caseNumber={item.caseNumber}
+          greeting={item.greeting}
+        />
+      );
     case 'error':
       return (
         <p role="alert" className="rounded-md bg-rose-50 px-3 py-2 body-small text-rose-800">

@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useParams } from 'react-router';
 import eaLogoBlack from '@/assets/images/logos/ea-filled-black-logo.svg';
-import { Conversation } from '@/components/conversation/Conversation';
+import { Conversation, ReplyForm } from '@/components/conversation/Conversation';
 import { MessageCard } from '@/components/conversation/MessageCard';
 import { DetailItem } from '@/components/details/DetailItem';
 import { DetailsBackBar } from '@/components/details/DetailsBackBar';
@@ -13,8 +13,12 @@ import { Upload } from '@/components/forms/Upload';
 import { Button } from '@/components/ui/Button';
 import { Chip } from '@/components/ui/Chip';
 import { Divider } from '@/components/ui/Divider';
-import cases from '@/data/cases';
+import { CaseTimeline } from '@/features/cases/CaseTimeline';
+import { PlainStatusPanel } from '@/features/cases/PlainStatusPanel';
+import { useCase } from '@/features/cases/useCases';
+import { useAiLayer } from '@/features/flags/aiLayer';
 import { usePlaceholderAction } from '@/hooks/usePlaceholderAction';
+import { plainStatusFor, timelineForCase } from '@/services/ea-api/cases';
 import { useScrollToTop } from '@/hooks/useScrollToTop';
 import { capitalizeEachWord, capitalizeFirstLetter } from '@/lib/text';
 import type { SupportCase } from '@/types/domain';
@@ -35,8 +39,8 @@ const CaseSummary = ({ supportCase }: { supportCase: SupportCase }) => (
   </div>
 );
 
-/** Open, active cases: guidance text plus the live conversation thread. */
-const LiveConversation = () => (
+/** Open, active cases: guidance text plus the live conversation (or, with the AI layer, the unified timeline). */
+const LiveConversation = ({ timeline }: { timeline?: ReactNode }) => (
   <div className="my-8">
     <Divider className="my-8" />
     <div className="my-2">
@@ -46,7 +50,14 @@ const LiveConversation = () => (
         you if they need more information. If you have questions, you can send a message to your advisor.
       </p>
     </div>
-    <Conversation />
+    {timeline ? (
+      <>
+        <ReplyForm />
+        {timeline}
+      </>
+    ) : (
+      <Conversation />
+    )}
   </div>
 );
 
@@ -153,7 +164,8 @@ const ResumeCase = () => {
 export const CaseDetailsPage = () => {
   useScrollToTop();
   const { caseId } = useParams();
-  const supportCase = cases.find((item) => item.id === caseId);
+  const aiEnabled = useAiLayer();
+  const supportCase = useCase(caseId);
 
   if (!supportCase) return <NotFoundMessage entity="case" />;
 
@@ -178,7 +190,21 @@ export const CaseDetailsPage = () => {
         <h4 className="mb-2 electronicArtsTextBold text-base">Original post:</h4>
         <p className="body-default">{supportCase.description}</p>
       </div>
-      {isLive ? <LiveConversation /> : <ArchivedConversation supportCase={supportCase} />}
+      {aiEnabled && <PlainStatusPanel status={plainStatusFor(supportCase)} />}
+      {aiEnabled ? (
+        isLive ? (
+          <LiveConversation timeline={<CaseTimeline entries={timelineForCase(supportCase)} />} />
+        ) : (
+          <>
+            <Divider className="my-8" />
+            <CaseTimeline entries={timelineForCase(supportCase)} />
+          </>
+        )
+      ) : isLive ? (
+        <LiveConversation />
+      ) : (
+        <ArchivedConversation supportCase={supportCase} />
+      )}
       {isResumable && <ResumeCase />}
     </div>
   );

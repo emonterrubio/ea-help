@@ -18,6 +18,14 @@ and produce every image the case-study page needs.
   pages with optimistic Follow, and status-change notifications (driven from the prototype
   dock's "Simulate incident status update"). A grounding test checks that every citation
   maps to a real article or incident.
+- **Phase 2 (understand & hand off): done.** Authored diagnostic trees (Battlefield 2042 PS5
+  crash, FIFA 23 connection drops) driving an interactive card: targeted questions, then
+  steps marked fixed / didn't work / skipped. When nothing works, the agent drafts a case
+  (issue, evidence, every step tried, sentiment) that the player edits and sends. Sending,
+  "Talk to a person" and safety/sentiment triggers all create a case and hand off warmly
+  (the advisor greets the player and references what was tried). Agent cases appear in My
+  Cases. Case details gain plain-language status and a unified web/AI/chat/email timeline.
+  Tests check that every escalation path carries the diagnostic log.
 
 ## Decisions (confirmed)
 

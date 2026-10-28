@@ -19,7 +19,7 @@ const context = {
 const run = async (input: AgentRequest['input']): Promise<AgentEvent[]> => {
   const events: AgentEvent[] = [];
   for await (const event of demoEngine.run(
-    { conversationId: 'c', input, context, history: [] },
+    { conversationId: 'c', input, context, history: [], diagnostics: [] },
     new AbortController().signal,
   )) {
     events.push(event);

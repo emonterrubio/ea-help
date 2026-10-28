@@ -25,9 +25,12 @@ describe('Help Agent', () => {
     renderAt('/');
     const dialog = await openAgent();
     await within(dialog).findByText(/an AI assistant/);
-    await userEvent.type(within(dialog).getByLabelText('Describe your issue'), 'My game keeps crashing{Enter}');
-    expect(await within(dialog).findByText('My game keeps crashing')).toBeInTheDocument();
-    expect(await within(dialog).findByText(/Crash troubleshooting/)).toBeInTheDocument();
+    await userEvent.type(
+      within(dialog).getByLabelText('Describe your issue'),
+      'Battlefield 2042 keeps crashing on my PS5{Enter}',
+    );
+    expect(await within(dialog).findByText('Battlefield 2042 keeps crashing on my PS5')).toBeInTheDocument();
+    expect(await within(dialog).findByRole('region', { name: /Guided troubleshooting/ })).toBeInTheDocument();
     expect(within(dialog).getByText('Understanding your request…')).toBeInTheDocument();
   });
 

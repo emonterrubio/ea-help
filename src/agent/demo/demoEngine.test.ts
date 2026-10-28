@@ -5,7 +5,10 @@ const context = {
   playerName: 'Tom Cook',
   platform: 'PS5',
   region: 'US',
-  ownedGames: [{ id: '1', title: 'Madden NFL 23' }],
+  ownedGames: [
+    { id: '1', title: 'Madden NFL 23' },
+    { id: '8', title: 'Battlefield 2042' },
+  ],
   activeIncidentIds: [],
 };
 
@@ -22,10 +25,15 @@ describe('demoEngine', () => {
       input: { kind: 'text', text: 'Battlefield 2042 keeps crashing on my PS5' },
       context,
       history: [],
+      diagnostics: [],
     });
-    expect(events.map((event) => event.type)).toEqual(['status', 'message', 'done']);
-    const message = events[1];
-    expect(message?.type === 'message' && message.level).toBe('L1');
+    expect(events.map((event) => event.type)).toEqual(['status', 'status', 'message', 'card', 'done']);
+    expect(events[2]).toMatchObject({ type: 'message', level: 'L1' });
+    expect(events[3]).toMatchObject({
+      type: 'card',
+      level: 'L1',
+      card: { type: 'diagnostic', treeId: 'bf2042-ps5-crash' },
+    });
   });
 
   it('hands off with a summary of what the player said', async () => {
@@ -34,17 +42,25 @@ describe('demoEngine', () => {
       input: { kind: 'talk_to_person' },
       context,
       history: ['My pack never arrived'],
+      diagnostics: [],
     });
     const handoff = events.find((event) => event.type === 'handoff');
     expect(handoff?.type === 'handoff' && handoff.summary).toContain('My pack never arrived');
-    expect(handoff?.type === 'handoff' && handoff.summary).toContain('PS5');
+    expect(handoff?.type === 'handoff' && handoff.caseNumber).toMatch(/^\d{10}$/);
+    expect(handoff?.type === 'handoff' && handoff.greeting).toMatch(/^Hi Tom, I'm Jordan/);
   });
 
   it('stops when aborted', async () => {
     const controller = new AbortController();
     controller.abort();
     const events = demoEngine.run(
-      { conversationId: 'c', input: { kind: 'scenario', scenarioId: 'quick-answer' }, context, history: [] },
+      {
+        conversationId: 'c',
+        input: { kind: 'scenario', scenarioId: 'quick-answer' },
+        context,
+        history: [],
+        diagnostics: [],
+      },
       controller.signal,
     );
     const iterator = events[Symbol.asyncIterator]();

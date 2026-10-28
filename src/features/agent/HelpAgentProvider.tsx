@@ -2,7 +2,9 @@ import { useCallback, useEffect, useMemo, useReducer, useRef, useState, type Rea
 import { useSearchParams } from 'react-router';
 import { demoEngine } from '@/agent/demo/demoEngine';
 import { findScenario, isScenarioId, type ScenarioId } from '@/agent/demo/scenarios';
+import type { DiagnosticResult } from '@/agent/diagnostics/types';
 import type { AgentContext, AgentInput } from '@/agent/protocol';
+import type { CaseDraftInput } from '@/services/ea-api/types';
 import { HelpAgentContext, introMessage, loadAgentContext, type HelpAgentApi } from './agentContext';
 import { conversationReducer, initialConversationState, playerHistory } from './conversation';
 
@@ -25,6 +27,7 @@ export const HelpAgentProvider = ({ enabled, children }: HelpAgentProviderProps)
   const [prefill, setPrefill] = useState('');
   const contextPromise = useRef<Promise<AgentContext> | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const diagnosticsRef = useRef<DiagnosticResult[]>([]);
   const itemsRef = useRef(state.items);
   useEffect(() => {
     itemsRef.current = state.items;
@@ -53,6 +56,7 @@ export const HelpAgentProvider = ({ enabled, children }: HelpAgentProviderProps)
     async (input: AgentInput, playerText?: string) => {
       // Captured before any await: the player's new message is not rendered yet.
       const history = [...playerHistory(itemsRef.current), ...(playerText ? [playerText] : [])];
+      const diagnostics = [...diagnosticsRef.current];
       abortRef.current?.abort();
       const controller = new AbortController();
       abortRef.current = controller;
@@ -64,6 +68,7 @@ export const HelpAgentProvider = ({ enabled, children }: HelpAgentProviderProps)
           input,
           context: loaded,
           history,
+          diagnostics,
         };
         for await (const event of engine.run(request, controller.signal)) {
           dispatch({ type: 'agent_event', event });
@@ -122,6 +127,26 @@ export const HelpAgentProvider = ({ enabled, children }: HelpAgentProviderProps)
     void run({ kind: 'talk_to_person' });
   }, [run]);
 
+  const reportDiagnostic = useCallback(
+    (result: DiagnosticResult) => {
+      const text = result.outcome === 'resolved' ? 'That fixed it.' : 'None of those steps worked.';
+      dispatch({ type: 'user_message', id: nextLocalId('user'), text });
+      void run({ kind: 'diagnostic_result', result }, text);
+      // Recorded after the run captured its inputs, so this result isn't counted twice.
+      diagnosticsRef.current = [...diagnosticsRef.current, result];
+    },
+    [run],
+  );
+
+  const submitCase = useCallback(
+    (draft: CaseDraftInput) => {
+      const text = 'Send my case to an advisor.';
+      dispatch({ type: 'user_message', id: nextLocalId('user'), text });
+      void run({ kind: 'submit_case', draft }, text);
+    },
+    [run],
+  );
+
   // Turning the AI layer off closes the panel and stops any running request.
   useEffect(() => {
     if (!enabled) {
@@ -148,8 +173,19 @@ export const HelpAgentProvider = ({ enabled, children }: HelpAgentProviderProps)
   }, [enabled, scenarioParam, open, setSearchParams]);
 
   const api = useMemo<HelpAgentApi>(
-    () => ({ state, mode: engine.mode, context, open, close, send, talkToPerson, prefill }),
-    [state, context, open, close, send, talkToPerson, prefill],
+    () => ({
+      state,
+      mode: engine.mode,
+      context,
+      open,
+      close,
+      send,
+      talkToPerson,
+      reportDiagnostic,
+      submitCase,
+      prefill,
+    }),
+    [state, context, open, close, send, talkToPerson, reportDiagnostic, submitCase, prefill],
   );
 
   return <HelpAgentContext.Provider value={api}>{children}</HelpAgentContext.Provider>;

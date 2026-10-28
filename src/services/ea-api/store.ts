@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from 'react';
 import { createExternalStore, safeStorage } from '@/lib/externalStore';
+import type { AgentCase } from './cases';
 import type { Grant, IncidentStatus } from './types';
 
 /** Mutable demo state layered on top of the static fixtures. */
@@ -9,6 +10,8 @@ export interface DemoState {
   followedIncidentIds: string[];
   /** Live status changes on top of the incident fixtures (advanced from the prototype dock). */
   incidentStatus: Record<string, IncidentStatus>;
+  /** Cases drafted by the Help Agent and sent by the player (newest first). */
+  createdCases: AgentCase[];
 }
 
 export const DEMO_STATE_STORAGE_KEY = 'ea-help:demo-state';
@@ -18,9 +21,11 @@ export const emptyDemoState = (): DemoState => ({
   grants: [],
   followedIncidentIds: [],
   incidentStatus: {},
+  createdCases: [],
 });
 
-type StoredDemoState = Omit<DemoState, 'incidentStatus'> & Partial<Pick<DemoState, 'incidentStatus'>>;
+type StoredDemoState = Omit<DemoState, 'incidentStatus' | 'createdCases'> &
+  Partial<Pick<DemoState, 'incidentStatus' | 'createdCases'>>;
 
 const isStoredDemoState = (value: unknown): value is StoredDemoState =>
   typeof value === 'object' &&
