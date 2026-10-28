@@ -37,7 +37,7 @@ export const SCENARIOS: Scenario[] = [
   {
     id: 'quick-answer',
     title: 'Quick answer',
-    prompt: 'How do I link my EA account to Twitch?',
+    prompt: 'How do I turn on login verification?',
     outcome: 'A short answer that cites the help article. No case needed.',
     capability: 'Help Agent',
     level: 'L0',

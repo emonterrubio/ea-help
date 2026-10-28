@@ -11,6 +11,13 @@ and produce every image the case-study page needs.
   registry + router + scripted engine, Help Agent panel shell (greeting with context,
   narrated status, talk to a person / handoff), launcher, `?scenario=` deep links, `/demo`
   hub. AI-off build is pixel-identical to production v1 (32/32 route × viewport checks).
+- **Phase 1 (read-only intelligence): done.** Grounded help-article search (`src/agent/knowledge`);
+  the agent answers with a cited article or declines to guess. Known-issue flow with an
+  incident card. Answer-first search (cited answer above results) and zero-result recovery
+  that opens the agent with the query pre-filled. Incident banners on Home and affected game
+  pages with optimistic Follow, and status-change notifications (driven from the prototype
+  dock's "Simulate incident status update"). A grounding test checks that every citation
+  maps to a real article or incident.
 
 ## Decisions (confirmed)
 

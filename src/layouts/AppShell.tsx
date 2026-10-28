@@ -6,6 +6,7 @@ import { DemoControls } from '@/features/demo-controls/DemoControls';
 import { HelpAgentHost } from '@/features/agent/HelpAgentHost';
 import { HelpAgentLauncher } from '@/features/agent/HelpAgentLauncher';
 import { HelpAgentProvider } from '@/features/agent/HelpAgentProvider';
+import { IncidentNotifications } from '@/features/incidents/IncidentNotifications';
 import { useAiLayer } from '@/features/flags/aiLayer';
 import { useScrollToTop } from '@/hooks/useScrollToTop';
 
@@ -38,6 +39,7 @@ export const AppShell = () => {
           <>
             <HelpAgentLauncher />
             <HelpAgentHost />
+            <IncidentNotifications />
           </>
         )}
         <DemoControls />

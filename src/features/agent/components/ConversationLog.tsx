@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import type { ConversationItem } from '../conversation';
+import { AgentCardView } from './AgentCardView';
 import { AgentMessage } from './AgentMessage';
 import { HandoffNotice } from './HandoffNotice';
 import { StatusLine } from './StatusLine';
@@ -22,8 +23,7 @@ const ConversationEntry = ({ item }: { item: ConversationItem }) => {
         </p>
       );
     case 'card':
-      // Card renderers (restore preview, receipt, steps, case draft…) arrive with their build phase.
-      return null;
+      return <AgentCardView card={item.card} />;
   }
 };
 

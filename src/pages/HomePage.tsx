@@ -9,6 +9,7 @@ import { Banner } from '@/components/sections/Banner';
 import { FeaturedGames } from '@/components/sections/FeaturedGames';
 import { PageHelpful } from '@/components/sections/PageHelpful';
 import { Topics } from '@/components/sections/Topics';
+import { IncidentBanners } from '@/features/incidents/IncidentBanners';
 import { greetingNames } from '@/data/navigation';
 import { useScrollToTop } from '@/hooks/useScrollToTop';
 import { pickRandom } from '@/lib/random';
@@ -33,6 +34,7 @@ export const HomePage = () => {
         </div>
       </PageHero>
       <PageContainer>
+        <IncidentBanners className="mt-6" />
         <div className="my-10">
           <Topics />
         </div>

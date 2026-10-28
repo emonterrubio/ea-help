@@ -8,7 +8,7 @@ const renderAt = (path: string) =>
   render(<RouterProvider router={createMemoryRouter(routes, { initialEntries: [path] })} />);
 
 const openAgent = async () => {
-  await userEvent.click(await screen.findByRole('button', { name: /ask the help agent/i }));
+  await userEvent.click(await screen.findByRole('button', { name: 'Ask the Help Agent' }));
   return screen.findByRole('dialog', { name: /ea help agent/i });
 };
 
@@ -46,7 +46,7 @@ describe('Help Agent', () => {
     renderAt('/');
     const dialog = await openAgent();
     await userEvent.click(within(dialog).getByRole('button', { name: 'Close Help Agent' }));
-    expect(await screen.findByRole('button', { name: /ask the help agent/i })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: 'Ask the Help Agent' })).toBeInTheDocument();
   });
 
   it('runs a deep-linked scenario', async () => {

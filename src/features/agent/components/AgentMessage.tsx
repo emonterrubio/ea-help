@@ -9,6 +9,7 @@ const citationLabel = (citation: Citation): string => {
       return citation.title;
     case 'purchase':
     case 'policy':
+    case 'incident':
       return citation.label;
   }
 };

@@ -49,7 +49,7 @@ const RULES: IntentRule[] = [
   },
   {
     scenario: 'quick-answer',
-    patterns: [/\btwitch\b/i, /\blink (my )?(ea )?account\b/i],
+    patterns: [/\bhow (do|can) i\b/i, /\blogin verification\b/i, /\bredeem\b/i, /\brefund\b/i],
   },
 ];
 

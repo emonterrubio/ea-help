@@ -3,7 +3,7 @@ import type { Game } from '@/types/domain';
 import { demoIncidents, demoPlayer, demoPurchases } from './fixtures';
 import { simulateLatency } from './latency';
 import { getDemoState, updateDemoState } from './store';
-import type { EntitlementStatus, Grant, Incident, PlayerProfile, Purchase } from './types';
+import type { EntitlementStatus, Grant, Incident, IncidentStatus, PlayerProfile, Purchase } from './types';
 
 /*
  * Mock EA Help APIs. Every function only ever touches the signed-in demo player's
@@ -14,6 +14,10 @@ export const getPlayerProfile = async (): Promise<PlayerProfile> => {
   await simulateLatency();
   return demoPlayer;
 };
+
+/** Titles of the player's games, for filtering answers (synchronous, used while typing). */
+export const ownedGameTitles = (): string[] =>
+  games.filter((game) => demoPlayer.ownedGameIds.includes(game.id)).map((game) => game.title);
 
 export const listOwnedGames = async (): Promise<Game[]> => {
   await simulateLatency();
@@ -80,16 +84,50 @@ export const undoGrant = async (referenceId: string, now = new Date()): Promise<
   }));
 };
 
+/** Incident fixtures with live status changes applied. */
+export const incidentsWithStatus = (overrides: Readonly<Record<string, IncidentStatus>>): Incident[] =>
+  demoIncidents.map((incident) => ({ ...incident, status: overrides[incident.id] ?? incident.status }));
+
+/** Unresolved incidents affecting any of the given games. Synchronous selector for rendering. */
+export const selectActiveIncidents = (
+  overrides: Readonly<Record<string, IncidentStatus>>,
+  gameIds: readonly string[] = demoPlayer.ownedGameIds,
+): Incident[] =>
+  incidentsWithStatus(overrides).filter(
+    (incident) => incident.status !== 'resolved' && gameIds.includes(incident.gameId),
+  );
+
 /** Active incidents affecting any of the given games (defaults to the player's games). */
 export const listIncidents = async (gameIds: readonly string[] = demoPlayer.ownedGameIds): Promise<Incident[]> => {
   await simulateLatency();
-  return demoIncidents.filter((incident) => incident.status !== 'resolved' && gameIds.includes(incident.gameId));
+  return selectActiveIncidents(getDemoState().incidentStatus, gameIds);
 };
 
+export const findIncident = (incidentId: string, overrides: Readonly<Record<string, IncidentStatus>>) =>
+  incidentsWithStatus(overrides).find((incident) => incident.id === incidentId);
+
+const NEXT_STATUS: Record<IncidentStatus, IncidentStatus> = {
+  investigating: 'identified',
+  identified: 'monitoring',
+  monitoring: 'resolved',
+  resolved: 'resolved',
+};
+
+/** Moves every unresolved incident one step toward resolved (prototype "simulate update"). */
+export const advanceIncidents = (): void => {
+  updateDemoState((state) => ({
+    ...state,
+    incidentStatus: Object.fromEntries(
+      incidentsWithStatus(state.incidentStatus).map((incident) => [incident.id, NEXT_STATUS[incident.status]]),
+    ),
+  }));
+};
+
+/** Optimistic: the follow state changes immediately, then the (simulated) request completes. */
 export const setIncidentFollowed = async (incidentId: string, followed: boolean): Promise<void> => {
-  await simulateLatency();
   updateDemoState((state) => {
     const others = state.followedIncidentIds.filter((id) => id !== incidentId);
     return { ...state, followedIncidentIds: followed ? [...others, incidentId] : others };
   });
+  await simulateLatency();
 };

@@ -19,6 +19,9 @@ export interface HelpAgentApi {
 
 export const HelpAgentContext = createContext<HelpAgentApi | null>(null);
 
+/** The Help Agent API, or `null` outside the provider (e.g. isolated component tests). */
+export const useOptionalHelpAgent = (): HelpAgentApi | null => useContext(HelpAgentContext);
+
 export const useHelpAgent = (): HelpAgentApi => {
   const api = useContext(HelpAgentContext);
   if (!api) throw new Error('useHelpAgent must be used inside <HelpAgentProvider>');

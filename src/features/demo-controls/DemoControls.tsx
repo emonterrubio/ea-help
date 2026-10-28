@@ -2,6 +2,7 @@ import { useId, useState } from 'react';
 import { MdOutlineScience } from 'react-icons/md';
 import { Link } from 'react-router';
 import { setAiLayerEnabled, useAiLayer } from '@/features/flags/aiLayer';
+import { advanceIncidents } from '@/services/ea-api/api';
 import { resetDemoState } from '@/services/ea-api/store';
 
 interface AiLayerSwitchProps {
@@ -57,6 +58,15 @@ export const DemoControls = () => {
           <p className="body-small text-gray-500">
             {aiEnabled ? 'Showing the 2026 AI layer.' : 'Showing v1 (2021) as shipped.'}
           </p>
+          {aiEnabled && (
+            <button
+              type="button"
+              className="text-left body-small text-blue-700 hover:underline"
+              onClick={advanceIncidents}
+            >
+              Simulate incident status update
+            </button>
+          )}
           <div className="flex items-center justify-between">
             <button type="button" className="body-small text-blue-700 hover:underline" onClick={resetDemoState}>
               Reset demo data

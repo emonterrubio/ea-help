@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { setAiLayerEnabled } from '@/features/flags/aiLayer';
 import { Search } from './Search';
 
 const resultsBox = () => screen.getByRole('listbox', { hidden: true }).parentElement as HTMLElement;
@@ -14,7 +15,8 @@ describe('Search', () => {
     expect(screen.getAllByRole('option').length).toBeLessThanOrEqual(10);
   });
 
-  it('keeps the list open with "No results found" once it has been opened', async () => {
+  it('keeps the list open with "No results found" once it has been opened (v1)', async () => {
+    setAiLayerEnabled(false);
     render(<Search placeholder="Search" />);
     await userEvent.type(screen.getByRole('combobox'), 'acc');
     await userEvent.type(screen.getByRole('combobox'), 'zzzq');

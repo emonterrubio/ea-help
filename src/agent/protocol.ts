@@ -9,7 +9,8 @@ import type { ScenarioId } from './demo/scenarios';
 export type Citation =
   | { kind: 'article'; articleId: string; title: string }
   | { kind: 'purchase'; purchaseId: string; label: string }
-  | { kind: 'policy'; policyId: string; label: string };
+  | { kind: 'policy'; policyId: string; label: string }
+  | { kind: 'incident'; incidentId: string; label: string };
 
 export type DiagnosticStepStatus = 'pending' | 'done' | 'skipped' | 'failed';
 

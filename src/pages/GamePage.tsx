@@ -10,6 +10,7 @@ import { FeaturedArticlesHeader } from '@/components/sections/FeaturedArticlesHe
 import { PageHelpful } from '@/components/sections/PageHelpful';
 import { Accordion } from '@/components/ui/Accordion';
 import { BackButton } from '@/components/ui/BackButton';
+import { IncidentBanners } from '@/features/incidents/IncidentBanners';
 import articles from '@/data/articles';
 import games from '@/data/games';
 import { useScrollToTop } from '@/hooks/useScrollToTop';
@@ -37,6 +38,7 @@ const GameContent = ({ game }: { game: Game }) => (
     <div className="my-6 sm:my-10 flex items-center">
       <BackButton />
     </div>
+    <IncidentBanners gameIds={[game.id]} className="mb-8" />
     <div className="mt-8 sm:h-20 h-16 overflow-hidden">
       <img className="mx-auto h-full object-contain" src={game.logo} alt={game.title} />
     </div>
@@ -46,7 +48,7 @@ const GameContent = ({ game }: { game: Game }) => (
       </h1>
     </div>
     <div className="relative sm:mt-10 mt-6 md:mx-10 mx-0">
-      <Search placeholder="Search help here" />
+      <Search placeholder="Search help here" gameTitle={game.title} />
     </div>
     <FeaturedArticlesHeader
       className="sm:mt-10 mt-6"

@@ -1,11 +1,16 @@
 import { useId, useMemo, useState, type ChangeEvent, type KeyboardEvent } from 'react';
 import { MdClose, MdSearch } from 'react-icons/md';
 import articles from '@/data/articles';
+import { AnswerCard } from '@/features/search/AnswerCard';
+import { MIN_ANSWER_QUERY_LENGTH, useAnswerFirst } from '@/features/search/useAnswerFirst';
+import { ZeroResultRecovery } from '@/features/search/ZeroResultRecovery';
 import { capitalizeFirstLetter } from '@/lib/text';
 import { findMatchingArticles, MAX_SEARCH_RESULTS } from './searchArticles';
 
 interface SearchProps {
   placeholder: string;
+  /** Scopes answer-first results to one game (game help pages). */
+  gameTitle?: string;
 }
 
 /**
@@ -15,8 +20,11 @@ interface SearchProps {
  * (showing "No results found" when the query stops matching) until the user
  * clears it with the close button or by backspacing the field to empty.
  * Submitting the form performs a native GET submit, as in the legacy app.
+ *
+ * With the AI layer on, a cited answer appears above the list, and a query with no
+ * matching articles offers the Help Agent instead of an empty result.
  */
-export const Search = ({ placeholder }: SearchProps) => {
+export const Search = ({ placeholder, gameTitle }: SearchProps) => {
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const inputId = useId();
@@ -25,6 +33,8 @@ export const Search = ({ placeholder }: SearchProps) => {
   const matches = useMemo(() => findMatchingArticles(articles, query), [query]);
   const visibleMatches = matches.slice(0, MAX_SEARCH_RESULTS);
   const statusText = matches.length === 0 ? 'No results found' : 'Search results';
+  const answerFirst = useAnswerFirst(query, gameTitle);
+  const showRecovery = answerFirst.enabled && matches.length === 0 && !answerFirst.answer && query.trim() !== '';
 
   const close = () => {
     setQuery('');
@@ -34,7 +44,10 @@ export const Search = ({ placeholder }: SearchProps) => {
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const nextQuery = event.target.value;
     setQuery(nextQuery);
-    if (findMatchingArticles(articles, nextQuery).length > 0) setIsOpen(true);
+    const hasMatches = findMatchingArticles(articles, nextQuery).length > 0;
+    // Answer-first search also opens for queries with no title match (to answer or recover).
+    const answerFirstReady = answerFirst.enabled && nextQuery.trim().length >= MIN_ANSWER_QUERY_LENGTH;
+    if (hasMatches || answerFirstReady) setIsOpen(true);
   };
 
   const handleKeyUp = (event: KeyboardEvent<HTMLInputElement>) => {
@@ -81,9 +94,15 @@ export const Search = ({ placeholder }: SearchProps) => {
         </button>
       </form>
       <div id={listId} className={`search-results ${isOpen ? 'block' : 'hidden'}`}>
-        <p className="p-2.5 electronicArtsTextBold text-sm text-slate-600 uppercase" role="status">
-          {statusText}
-        </p>
+        {answerFirst.answer && <AnswerCard answer={answerFirst.answer} onAskFollowUp={answerFirst.askAgent} />}
+        {showRecovery && answerFirst.askAgent && (
+          <ZeroResultRecovery query={query.trim()} onAskAgent={answerFirst.askAgent} />
+        )}
+        {(!answerFirst.enabled || matches.length > 0) && (
+          <p className="p-2.5 electronicArtsTextBold text-sm text-slate-600 uppercase" role="status">
+            {statusText}
+          </p>
+        )}
         <ul role="listbox" aria-label="Search results">
           {visibleMatches.map((article) => (
             <li
