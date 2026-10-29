@@ -7,7 +7,7 @@ interface StatusLineProps {
 
 /** Narrated step ("Checking your purchases…") so waiting reads as progress (PRD principle 1). */
 export const StatusLine = ({ text, state }: StatusLineProps) => (
-  <div className="flex items-center gap-x-2 body-small text-gray-500">
+  <div className="flex items-center gap-x-2 text-sm tracking-wide text-gray-500">
     {state === 'active' ? (
       <span
         aria-hidden="true"

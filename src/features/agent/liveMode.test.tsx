@@ -52,7 +52,6 @@ describe('hybrid live mode', () => {
     const dialog = await screen.findByRole('dialog', { name: /ea help agent/i });
     expect(await within(dialog).findByRole('region', { name: /^Preview: Restore/ })).toBeInTheDocument();
     expect(await within(dialog).findByText('Found it. Nothing changes until you confirm.')).toBeInTheDocument();
-    expect(within(dialog).getByText('AI assistant · Live')).toBeInTheDocument();
     expect(within(dialog).getByRole('button', { name: 'Attach a screenshot' })).toBeInTheDocument();
     expect(posts).toHaveLength(3);
   });
@@ -62,7 +61,6 @@ describe('hybrid live mode', () => {
     renderScenario('content-recovery');
     const dialog = await screen.findByRole('dialog', { name: /ea help agent/i });
     expect(await within(dialog).findByRole('region', { name: /^Preview: Restore/ })).toBeInTheDocument();
-    expect(within(dialog).getByText('AI assistant · Demo mode')).toBeInTheDocument();
     expect(within(dialog).queryByRole('button', { name: 'Attach a screenshot' })).not.toBeInTheDocument();
   });
 
@@ -71,7 +69,7 @@ describe('hybrid live mode', () => {
     renderScenario('content-recovery');
     const dialog = await screen.findByRole('dialog', { name: /ea help agent/i });
     expect(await within(dialog).findByRole('region', { name: /^Preview: Restore/ })).toBeInTheDocument();
-    expect(within(dialog).getByText('AI assistant · Demo mode')).toBeInTheDocument();
+    expect(within(dialog).queryByRole('button', { name: 'Attach a screenshot' })).not.toBeInTheDocument();
     expect(posts).toHaveLength(0);
   });
 });

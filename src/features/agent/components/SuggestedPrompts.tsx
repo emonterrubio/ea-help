@@ -8,14 +8,14 @@ export const SuggestedPrompts = ({ onPick }: { onPick: (prompt: string) => void 
 
   return (
     <div>
-      <p className="mb-2 body-small text-gray-500">Try asking</p>
+      <p className="mb-2 text-sm tracking-wide text-gray-500">Try asking</p>
       <ul className="flex flex-col gap-y-1.5">
         {prompts.map((scenario) => (
           <li key={scenario.id}>
             <button
               type="button"
               onClick={() => onPick(scenario.prompt)}
-              className="w-full rounded-md border border-solid border-gray-200 bg-white px-3 py-2 text-left body-small text-gray-800 hover:border-blue-600 hover:text-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+              className="w-full rounded-md border border-solid border-gray-200 bg-white px-3 py-2 text-left text-sm tracking-wide text-gray-800 hover:border-blue-600 hover:text-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
             >
               {scenario.prompt}
             </button>

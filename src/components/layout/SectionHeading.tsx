@@ -12,7 +12,7 @@ export const SectionHeading = ({ title, description, action }: SectionHeadingPro
   <div className="flex justify-between items-center">
     <div className="mb-2">
       <h2 className="electronicArtsDisplayBold md:text-3xl text-2xl">{title}</h2>
-      {description && <p className="my-2 body-default">{description}</p>}
+      {description && <p className="my-2 text-base leading-5 tracking-wide">{description}</p>}
     </div>
     {action}
   </div>

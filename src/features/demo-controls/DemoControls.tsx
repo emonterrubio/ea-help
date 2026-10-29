@@ -15,7 +15,7 @@ const AiLayerSwitch = ({ enabled, onChange }: AiLayerSwitchProps) => {
 
   return (
     <div className="flex items-center justify-between gap-x-3">
-      <span id={labelId} className="body-small">
+      <span id={labelId} className="text-sm tracking-wide">
         AI layer (v3)
       </span>
       <button
@@ -55,23 +55,23 @@ export const DemoControls = () => {
         <div id={panelId} className="mb-2 w-60 rounded-md bg-white p-4 shadow-lg ring-1 ring-black/10 space-y-3">
           <p className="electronicArtsTextBold text-sm text-gray-900">Prototype controls</p>
           <AiLayerSwitch enabled={aiEnabled} onChange={setAiLayerEnabled} />
-          <p className="body-small text-gray-500">
+          <p className="text-sm tracking-wide text-gray-500">
             {aiEnabled ? 'Showing the 2026 AI layer.' : 'Showing v1 (2021) as shipped.'}
           </p>
           {aiEnabled && (
             <button
               type="button"
-              className="text-left body-small text-blue-700 hover:underline"
+              className="text-left text-sm tracking-wide text-blue-700 hover:underline"
               onClick={advanceIncidents}
             >
               Simulate incident status update
             </button>
           )}
           <div className="flex items-center justify-between">
-            <button type="button" className="body-small text-blue-700 hover:underline" onClick={resetDemoState}>
+            <button type="button" className="text-sm tracking-wide text-blue-700 hover:underline" onClick={resetDemoState}>
               Reset demo data
             </button>
-            <Link to="/demo" className="body-small text-blue-700 hover:underline">
+            <Link to="/demo" className="text-sm tracking-wide text-blue-700 hover:underline">
               Scenarios
             </Link>
           </div>

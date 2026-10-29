@@ -15,30 +15,4 @@
     font-family: var(--font-family-sans);
     font-weight: 700;
   }
-
-  /* Type scale */
-  .body-default {
-    font-size: 1rem !important;
-    line-height: 1.25rem !important;
-    letter-spacing: 0.025rem !important;
-    font-family: var(--font-family-sans);
-    font-weight: 400;
-  }
-
-  .body-small {
-    font-size: 0.875rem !important;
-    line-height: 1.25rem !important;
-    letter-spacing: 0.025rem !important;
-    font-family: var(--font-family-sans);
-    font-weight: 400;
-  }
-
-  .eyebrow-default {
-    font-size: 0.75rem !important;
-    line-height: 1.5rem !important;
-    letter-spacing: 0.05rem !important;
-    font-family: var(--font-family-sans);
-    font-weight: 700;
-    text-transform: uppercase;
-  }
 }

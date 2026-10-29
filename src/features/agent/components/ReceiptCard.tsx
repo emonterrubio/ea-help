@@ -37,20 +37,20 @@ export const ReceiptCard = ({ referenceId, title, appliedAt, undoable, caseId }:
         <h3 className="electronicArtsTextBold text-sm text-green-900">{title}</h3>
       </div>
       <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
-        <dt className="body-small text-gray-600">Reference ID</dt>
-        <dd className="body-small text-gray-900">{referenceId}</dd>
-        <dt className="body-small text-gray-600">Applied</dt>
-        <dd className="body-small text-gray-900">{formatAppliedAt(appliedAt)}</dd>
+        <dt className="text-sm tracking-wide text-gray-600">Reference ID</dt>
+        <dd className="text-sm tracking-wide text-gray-900">{referenceId}</dd>
+        <dt className="text-sm tracking-wide text-gray-600">Applied</dt>
+        <dd className="text-sm tracking-wide text-gray-900">{formatAppliedAt(appliedAt)}</dd>
       </dl>
       <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
         {caseId && (
-          <Link to={`/cases/active/${caseId}`} onClick={close} className="body-small text-blue-700 underline">
+          <Link to={`/cases/active/${caseId}`} onClick={close} className="text-sm tracking-wide text-blue-700 underline">
             View in My Cases
           </Link>
         )}
         {undoable &&
           (undoneAt ? (
-            <p role="status" className="body-small text-gray-700">
+            <p role="status" className="text-sm tracking-wide text-gray-700">
               Undone. The change was reversed.
             </p>
           ) : (

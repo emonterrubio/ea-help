@@ -16,7 +16,7 @@ export const PageHelpful = () => (
       </Button>
     </div>
     <div>
-      <p className="mx-auto body-small text-center">
+      <p className="mx-auto text-sm tracking-wide text-center">
         {capitalizeFirstLetter('we use this feedback to improve our documentation.')}
       </p>
     </div>

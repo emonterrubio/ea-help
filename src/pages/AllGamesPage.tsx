@@ -32,16 +32,16 @@ export const AllGamesPage = () => {
         </div>
         <div className="mb-4 block sm:flex justify-between gap-x-3 items-center items-end">
           <div className="flex-1 pt-2 sm:p-0">
-            <p className="body-default">Select from one of the titles you own.</p>
+            <p className="text-base leading-5 tracking-wide">Select from one of the titles you own.</p>
           </div>
           <div className="flex items-center pt-3 sm:p-0 gap-x-3">
-            <label htmlFor={sortId} className="body-default">
+            <label htmlFor={sortId} className="text-base leading-5 tracking-wide">
               View by:
             </label>
             <div className="relative">
               <select
                 id={sortId}
-                className="p-2 border border-solid border-slate-200 rounded-sm body-default"
+                className="p-2 border border-solid border-slate-200 rounded-sm text-base leading-5 tracking-wide"
                 onChange={handleSortChange}
               >
                 {GAME_SORT_OPTIONS.map(({ value, label }) => (

@@ -7,7 +7,7 @@ export const NotFoundPage = () => (
     <PageContainer>
       <div className="py-16">
         <h1 className="electronicArtsDisplayBold md:text-3xl text-2xl mb-2">Page not found</h1>
-        <p className="body-default mb-4">The page you’re looking for doesn’t exist.</p>
+        <p className="text-base leading-5 tracking-wide mb-4">The page you’re looking for doesn’t exist.</p>
         <Link to="/" className="btn btn-link btn-md -ml-3.5">
           Go to EA Help home
         </Link>

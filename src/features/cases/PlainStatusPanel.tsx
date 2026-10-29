@@ -17,7 +17,7 @@ export const PlainStatusPanel = ({ status }: { status: PlainStatus }) => (
       {ROWS.map(({ key, label }) => (
         <div key={key}>
           <dt className="electronicArtsTextBold text-xs uppercase tracking-wide text-blue-900">{label}</dt>
-          <dd className="mt-1 body-small text-gray-900">{status[key]}</dd>
+          <dd className="mt-1 text-sm tracking-wide text-gray-900">{status[key]}</dd>
         </div>
       ))}
     </dl>

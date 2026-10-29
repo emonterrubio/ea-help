@@ -45,7 +45,7 @@ const LiveConversation = ({ timeline }: { timeline?: ReactNode }) => (
   <div className="my-8">
     <Divider className="my-8" />
     <div className="my-2">
-      <p className="body-small">
+      <p className="text-sm tracking-wide">
         You can exchange case-related information, including photos and pdfs here. Our goal is to respond to your
         message as quickly as possbile. Please allow up to 2 business days for a response. An advisor will only contact
         you if they need more information. If you have questions, you can send a message to your advisor.
@@ -88,7 +88,7 @@ const ResumeCasePrompt = ({ onStart }: { onStart: () => void }) => (
           <h3 className="mb-1 electronicArtsDisplayBold text-2xl tracking-wide">Need more help with this issue?</h3>
         </div>
         <div>
-          <p className="body-small">
+          <p className="text-sm tracking-wide">
             To resume this case, send us a message in which you can add more content such as attachments or continue to
             contact one of our advisors. Otherwise, your case will be closed automatically in 12 days.
           </p>
@@ -191,7 +191,7 @@ export const CaseDetailsPage = () => {
       <CaseSummary supportCase={supportCase} />
       <div className="my-8">
         <h4 className="mb-2 electronicArtsTextBold text-base">Original post:</h4>
-        <p className="body-default">{supportCase.description}</p>
+        <p className="text-base leading-5 tracking-wide">{supportCase.description}</p>
       </div>
       {aiEnabled && <PlainStatusPanel status={plainStatusFor(supportCase)} />}
       {aiEnabled && receiptReferenceId && <ReceiptUndoPanel referenceId={receiptReferenceId} />}

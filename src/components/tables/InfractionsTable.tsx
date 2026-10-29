@@ -32,19 +32,19 @@ const InfractionRow = ({ infraction }: { infraction: Infraction }) => {
         {/* Stacked details for small screens */}
         <dl className="font-base lg:hidden">
           <dt className="sr-only">Type</dt>
-          <dd className="body-small truncate">{capitalizeFirstLetter(infraction.type)}</dd>
+          <dd className="text-sm tracking-wide truncate">{capitalizeFirstLetter(infraction.type)}</dd>
           <dt className="sr-only">Status</dt>
-          <dd className="mt-1 truncate body-small sm:hidden">
+          <dd className="mt-1 truncate text-sm tracking-wide sm:hidden">
             <StatusChip infraction={infraction} />
           </dd>
         </dl>
       </td>
-      <td className="w-fit hidden px-3 py-4 body-small lg:table-cell">{capitalizeFirstLetter(infraction.type)}</td>
-      <td className="w-fit hidden px-3 body-small sm:table-cell">
+      <td className="w-fit hidden px-3 py-4 text-sm tracking-wide lg:table-cell">{capitalizeFirstLetter(infraction.type)}</td>
+      <td className="w-fit hidden px-3 text-sm tracking-wide sm:table-cell">
         <StatusChip infraction={infraction} />
       </td>
-      <td className="w-fit px-3 py-4 body-small lg:table-cell">{infraction.date}</td>
-      <td className="w-fit px-3 py-4 body-small lg:table-cell">{infraction.enddate}</td>
+      <td className="w-fit px-3 py-4 text-sm tracking-wide lg:table-cell">{infraction.date}</td>
+      <td className="w-fit px-3 py-4 text-sm tracking-wide lg:table-cell">{infraction.enddate}</td>
       <td className="w-fit pl-3 pr-4 lg:table-cell">
         <Button
           buttonStyle="btn-terciary-solid"

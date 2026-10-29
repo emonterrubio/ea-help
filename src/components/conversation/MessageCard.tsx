@@ -39,12 +39,12 @@ export const MessageCard = ({
     </div>
     <div className="w-full">
       <div className="flex justify-between mb-2">
-        <p className="body-small">{author}</p>
-        <p className="body-small">{timestamp}</p>
+        <p className="text-sm tracking-wide">{author}</p>
+        <p className="text-sm tracking-wide">{timestamp}</p>
       </div>
       <div>
         {heading && <h4 className="electronicArtsTextBold text-base text-gray-800">{heading}</h4>}
-        <p className="mt-1 body-default">{body}</p>
+        <p className="mt-1 text-base leading-5 tracking-wide">{body}</p>
       </div>
       {children}
     </div>

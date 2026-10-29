@@ -37,14 +37,14 @@ export const IncidentNotice = ({ incident, headingLevel = 'h3', action }: Incide
       }
     >
       <p className="mt-1 electronicArtsTextBold text-base">{incident.title}</p>
-      <p className="mt-1 body-small">{incident.summary}</p>
+      <p className="mt-1 text-sm tracking-wide">{incident.summary}</p>
       <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
-        <p className="body-small">
+        <p className="text-sm tracking-wide">
           <span className="electronicArtsTextBold">Status: </span>
           {INCIDENT_STATUS_LABELS[incident.status]}
         </p>
         {expectation && (
-          <p className="body-small">
+          <p className="text-sm tracking-wide">
             <span className="electronicArtsTextBold">Next: </span>
             {expectation}
           </p>

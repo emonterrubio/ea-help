@@ -65,7 +65,7 @@ export const OneClickFixPanel = ({ fix, gameId, onApplied }: OneClickFixPanelPro
           <p className="electronicArtsTextBold text-xs text-amber-900">This will:</p>
           <ul className="mt-1 space-y-0.5 pl-5">
             {fix.changes.map((change) => (
-              <li key={change} className="list-item list-disc body-small text-gray-800">
+              <li key={change} className="list-item list-disc text-sm tracking-wide text-gray-800">
                 {change}
               </li>
             ))}
@@ -94,13 +94,13 @@ export const OneClickFixPanel = ({ fix, gameId, onApplied }: OneClickFixPanelPro
       );
     case 'applied':
       return (
-        <p role="status" className="mt-3 rounded-md bg-green-50 px-3 py-2 body-small text-green-900">
+        <p role="status" className="mt-3 rounded-md bg-green-50 px-3 py-2 text-sm tracking-wide text-green-900">
           Done. Reference ID {fixState.referenceId}. Try the game again, then tell me how it went.
         </p>
       );
     case 'rejected':
       return (
-        <p role="status" className="mt-3 rounded-md bg-gray-100 px-3 py-2 body-small text-gray-800">
+        <p role="status" className="mt-3 rounded-md bg-gray-100 px-3 py-2 text-sm tracking-wide text-gray-800">
           I can&apos;t apply this fix right now: {fixState.reasons.join(' ')} Nothing was changed.
         </p>
       );

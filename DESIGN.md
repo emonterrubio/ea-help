@@ -54,11 +54,16 @@ class names are legacy; Display and Text both resolve to Inter, and the suffix s
 | `electronicArtsTextRegular`    | 400                  | Form labels, hero subtitles       |
 | `electronicArtsTextLight`      | 300                  | Light text                        |
 | `electronicArtsDisplayLight`   | 300                  | Light display text                |
-| `body-default`                 | 400, 16/20           | Paragraph copy                    |
-| `body-small`                   | 400, 14/20           | Secondary copy, metadata          |
-| `eyebrow-default`              | 700, 12/24 uppercase | Eyebrows                          |
 
-Sizes come from Tailwind (`text-xl`, `sm:text-6xl` …). Elements without a type class
+Font sizes use standard Tailwind utilities only. Don't add custom font-size classes.
+
+| Role                    | Classes                                               |
+| ----------------------- | ----------------------------------------------------- |
+| Paragraph copy          | `text-base leading-5 tracking-wide`                   |
+| Secondary copy, metadata | `text-sm tracking-wide`                              |
+| Eyebrows                | `text-xs font-bold uppercase leading-6 tracking-wider` |
+
+Headings use Tailwind sizes too (`text-xl`, `sm:text-6xl` …). Elements without a type class
 use Inter through the reset.
 
 ## 4. Layout

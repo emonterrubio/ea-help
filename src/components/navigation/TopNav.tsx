@@ -5,7 +5,7 @@ import { UserAvatarButton } from './UserAvatarButton';
 import { tabClassName } from './navLinkClasses';
 
 const linkClassName = tabClassName(
-  'body-default border-transparent inline-flex items-center px-1 pt-1 border-solid border-b-4 transition duration-150 ease-in-out',
+  'text-base leading-5 tracking-wide border-transparent inline-flex items-center px-1 pt-1 border-solid border-b-4 transition duration-150 ease-in-out',
 );
 
 /** Fixed desktop header (≥ md) with logo, primary navigation and avatar. */

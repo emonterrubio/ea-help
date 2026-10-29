@@ -25,7 +25,7 @@ export const ReceiptUndoPanel = ({ referenceId }: { referenceId: string }) => {
         <h3 id="receipt-undo-heading" className="electronicArtsTextBold text-base text-gray-900">
           Changed your mind?
         </h3>
-        <p className="mt-1 body-small text-gray-700">
+        <p className="mt-1 text-sm tracking-wide text-gray-700">
           Undo reverses this change on your account. Reference ID {receipt.referenceId}.
         </p>
       </div>

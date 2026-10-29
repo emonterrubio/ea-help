@@ -99,7 +99,7 @@ export const AgentComposer = ({ onSend, disabled, initialValue, allowImages = fa
             alt=""
             className="h-8 w-8 flex-shrink-0 rounded object-cover"
           />
-          <p className="min-w-0 flex-1 truncate body-small text-gray-700">{image.name}</p>
+          <p className="min-w-0 flex-1 truncate text-sm tracking-wide text-gray-700">{image.name}</p>
           <button
             type="button"
             onClick={() => setImage(null)}
@@ -111,7 +111,7 @@ export const AgentComposer = ({ onSend, disabled, initialValue, allowImages = fa
         </div>
       )}
       {imageError && (
-        <p id={errorId} role="alert" className="mb-2 body-small text-red-700">
+        <p id={errorId} role="alert" className="mb-2 text-sm tracking-wide text-red-700">
           {imageError}
         </p>
       )}
@@ -153,7 +153,7 @@ export const AgentComposer = ({ onSend, disabled, initialValue, allowImages = fa
           onDrop={handleDrop}
           aria-describedby={imageError ? `${hintId} ${errorId}` : hintId}
           placeholder="Describe your issue in your own words"
-          className="block w-full resize-none rounded-md border border-solid border-gray-300 px-3 py-2 body-default shadow-sm outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+          className="block w-full resize-none rounded-md border border-solid border-gray-300 px-3 py-2 text-sm leading-5 tracking-wide shadow-sm outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
         />
         <p id={hintId} className="sr-only">
           Press Enter to send, Shift and Enter for a new line.

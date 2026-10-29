@@ -40,7 +40,7 @@ export const Alert = ({
             </Heading>
             {description != null && (
               <div className="mt-1">
-                <p className="body-small">{description}</p>
+                <p className="text-sm tracking-wide">{description}</p>
               </div>
             )}
             {children}

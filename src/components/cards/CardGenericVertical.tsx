@@ -39,7 +39,7 @@ export const CardGenericVertical = ({
           </Chip>
         </div>
         <div className="mb-1">
-          <span className="body-small">
+          <span className="text-sm tracking-wide">
             {label} {date}
           </span>
         </div>

@@ -33,7 +33,7 @@ export const CardTopics = ({
           <h3 className="electronicArtsDisplayBold text-xl tracking-wide">{title}</h3>
         </div>
         <div>
-          <p className="body-default">{subtitle}</p>
+          <p className="text-base leading-5 tracking-wide">{subtitle}</p>
         </div>
       </div>
       <div className="-ml-3.5 mt-2 flex items-center">

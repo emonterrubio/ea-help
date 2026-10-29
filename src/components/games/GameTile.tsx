@@ -28,9 +28,9 @@ export const GameTile = ({ game, showMeta = false }: GameTileProps) => (
       {truncate(game.title, MAX_TITLE_LENGTH)}
     </div>
     {showMeta && (
-      <div className="flex items-center justify-around gap-x-2 body-default text-center mx-12">
-        <p className="body-small text-center p-1 bg-zinc-100 rounded-md">{game.year}</p>
-        <p className="body-small text-center p-1 bg-zinc-100 rounded-md">{capitalizeFirstLetter(game.genre)}</p>
+      <div className="flex items-center justify-around gap-x-2 text-base leading-5 tracking-wide text-center mx-12">
+        <p className="text-sm tracking-wide text-center p-1 bg-zinc-100 rounded-md">{game.year}</p>
+        <p className="text-sm tracking-wide text-center p-1 bg-zinc-100 rounded-md">{capitalizeFirstLetter(game.genre)}</p>
       </div>
     )}
   </div>

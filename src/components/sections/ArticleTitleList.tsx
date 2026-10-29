@@ -10,7 +10,7 @@ export const ArticleTitleList = ({ titles }: ArticleTitleListProps) => (
     {titles.map((title, index) => (
       <li
         key={`${index}-${title}`}
-        className="body-default py-2 px-3 hover:bg-slate-100 hover:text-blue-600 cursor-pointer"
+        className="text-base leading-5 tracking-wide py-2 px-3 hover:bg-slate-100 hover:text-blue-600 cursor-pointer"
       >
         {capitalizeFirstLetter(title)}
       </li>

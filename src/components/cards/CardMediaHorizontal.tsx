@@ -20,7 +20,7 @@ export const CardMediaHorizontal = ({ img, title, subtitle, buttonLabel, buttonW
           <h2 className="electronicArtsDisplayBold text-2xl tracking-wide">{title}</h2>
         </div>
         <div>
-          <p className="body-default">{subtitle}</p>
+          <p className="text-base leading-5 tracking-wide">{subtitle}</p>
         </div>
       </div>
       <div className="flex mt-4 items-center">

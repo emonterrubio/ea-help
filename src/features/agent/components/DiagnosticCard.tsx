@@ -44,7 +44,7 @@ const Questions = ({ tree, onComplete }: QuestionsProps) => {
                     onChange={() => setAnswers((current) => ({ ...current, [question.id]: option.value }))}
                     className="h-4 w-4 accent-blue-700"
                   />
-                  <label htmlFor={id} className="body-small text-gray-800">
+                  <label htmlFor={id} className="text-sm tracking-wide text-gray-800">
                     {option.label}
                   </label>
                 </div>
@@ -97,7 +97,7 @@ const Steps = ({ tree, path, log, onOutcome, onFixApplied, finished }: StepsProp
           const Icon = OUTCOME_ICON[entry.outcome];
           return (
             <li key={stepId} className="flex items-center justify-between gap-x-2 rounded-md bg-white px-3 py-2">
-              <span className="body-small text-gray-700">
+              <span className="text-sm tracking-wide text-gray-700">
                 {index + 1}. {step.title}
               </span>
               <span
@@ -112,7 +112,7 @@ const Steps = ({ tree, path, log, onOutcome, onFixApplied, finished }: StepsProp
 
         if (isUpcoming) {
           return (
-            <li key={stepId} className="rounded-md px-3 py-2 body-small text-gray-400">
+            <li key={stepId} className="rounded-md px-3 py-2 text-sm tracking-wide text-gray-400">
               {index + 1}. {step.title}
             </li>
           );
@@ -120,13 +120,13 @@ const Steps = ({ tree, path, log, onOutcome, onFixApplied, finished }: StepsProp
 
         return (
           <li key={stepId} className="rounded-md bg-white p-3 ring-2 ring-blue-600" aria-current="step">
-            <p className="body-small text-gray-500">
+            <p className="text-sm tracking-wide text-gray-500">
               Step {index + 1} of {path.length}
             </p>
             <h4 ref={currentRef} tabIndex={-1} className="electronicArtsTextBold text-sm text-gray-900 outline-none">
               {step.title}
             </h4>
-            <p className="mt-1 body-small text-gray-800">{step.body}</p>
+            <p className="mt-1 text-sm tracking-wide text-gray-800">{step.body}</p>
             {step.fix && (
               <OneClickFixPanel
                 fix={step.fix}
@@ -207,7 +207,7 @@ export const DiagnosticCard = ({ treeId }: { treeId: string }) => {
       aria-label={`Guided troubleshooting: ${tree.title}`}
       className="rounded-lg bg-sky-50 p-4 ring-1 ring-sky-200"
     >
-      <p className="eyebrow-default text-sky-900">Guided troubleshooting · {tree.platform}</p>
+      <p className="text-xs font-bold uppercase leading-6 tracking-wider text-sky-900">Guided troubleshooting · {tree.platform}</p>
       <h3 className="mb-3 electronicArtsTextBold text-base text-gray-900">{tree.title}</h3>
       {answers ? (
         <Steps

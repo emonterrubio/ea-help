@@ -22,7 +22,7 @@ export const FeaturedGames = () => {
       </div>
       <div className="mb-2 flex justify-between items-center">
         <div className="flex-1">
-          <p className="py-2 body-default">Select from one of the titles you own.</p>
+          <p className="py-2 text-base leading-5 tracking-wide">Select from one of the titles you own.</p>
         </div>
         <div>
           {featuredGames.length >= FEATURED_COUNT && (

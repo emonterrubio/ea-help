@@ -12,8 +12,8 @@ export const Attachment = ({ fileName, size }: AttachmentProps) => (
       <ImFilePdf className="h-8 w-8 my-2 text-red-600" aria-hidden="true" />
     </div>
     <div className="ml-3">
-      <p className="body-small">{fileName}</p>
-      <p className="body-small font-medium">{size}</p>
+      <p className="text-sm tracking-wide">{fileName}</p>
+      <p className="text-sm tracking-wide font-medium">{size}</p>
     </div>
   </div>
 );

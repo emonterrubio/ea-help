@@ -23,13 +23,13 @@ export const HandoffNotice = ({ advisorName, summary, caseId, caseNumber, greeti
             {advisorName}, an EA Help advisor (a person), has joined
           </p>
         </div>
-        <p className="mt-2 body-small text-gray-700">
+        <p className="mt-2 text-sm tracking-wide text-gray-700">
           <span className="electronicArtsTextBold">What {advisorName} already knows: </span>
           {summary}
         </p>
-        <p className="mt-2 body-small text-gray-700">
+        <p className="mt-2 text-sm tracking-wide text-gray-700">
           Case #{caseNumber} is in{' '}
-          <Link to={`/cases/active/${caseId}`} onClick={close} className="body-small text-blue-700 underline">
+          <Link to={`/cases/active/${caseId}`} onClick={close} className="text-sm tracking-wide text-blue-700 underline">
             My Cases
           </Link>
           .
@@ -38,7 +38,7 @@ export const HandoffNotice = ({ advisorName, summary, caseId, caseNumber, greeti
       <div className="max-w-[92%]">
         <p className="mb-1 electronicArtsTextBold text-xs text-gray-700">{advisorName} · EA Help advisor</p>
         <div className="rounded-lg rounded-tl-sm bg-green-100 px-3.5 py-2.5">
-          <p className="body-default text-gray-900">{greeting}</p>
+          <p className="text-base leading-5 tracking-wide text-gray-900">{greeting}</p>
         </div>
       </div>
     </section>

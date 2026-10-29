@@ -8,7 +8,7 @@ interface ZeroResultRecoveryProps {
 /** No good answer means an offer to start the Help Agent, not an empty page. */
 export const ZeroResultRecovery = ({ query, onAskAgent }: ZeroResultRecoveryProps) => (
   <div className="rounded-md bg-slate-50 p-3">
-    <p className="body-small text-gray-700">
+    <p className="text-sm tracking-wide text-gray-700">
       No articles match “{query}”. The Help Agent can work through it with you.
     </p>
     <button

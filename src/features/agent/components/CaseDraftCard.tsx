@@ -22,7 +22,7 @@ export const CaseDraftCard = ({ draft }: { draft: CaseDraftInput }) => {
 
   return (
     <section aria-label="Draft case" className="rounded-lg bg-white p-4 ring-1 ring-gray-300">
-      <p className="eyebrow-default text-gray-600">Draft case · review before sending</p>
+      <p className="text-xs font-bold uppercase leading-6 tracking-wider text-gray-600">Draft case · review before sending</p>
       <div className="mt-2 space-y-3">
         <div>
           <label htmlFor={titleId} className="electronicArtsTextBold text-xs text-gray-700">
@@ -33,7 +33,7 @@ export const CaseDraftCard = ({ draft }: { draft: CaseDraftInput }) => {
             value={title}
             onChange={(event) => setTitle(event.target.value)}
             readOnly={!isEditing}
-            className="mt-1 block w-full rounded-md border border-solid border-gray-300 px-2.5 py-1.5 body-small outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 read-only:bg-gray-50"
+            className="mt-1 block w-full rounded-md border border-solid border-gray-300 px-2.5 py-1.5 text-sm tracking-wide outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 read-only:bg-gray-50"
           />
         </div>
         <div>
@@ -46,14 +46,14 @@ export const CaseDraftCard = ({ draft }: { draft: CaseDraftInput }) => {
             value={summary}
             onChange={(event) => setSummary(event.target.value)}
             readOnly={!isEditing}
-            className="mt-1 block w-full resize-y rounded-md border border-solid border-gray-300 px-2.5 py-1.5 body-small outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 read-only:bg-gray-50"
+            className="mt-1 block w-full resize-y rounded-md border border-solid border-gray-300 px-2.5 py-1.5 text-sm tracking-wide outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 read-only:bg-gray-50"
           />
         </div>
         <div>
           <h4 className="electronicArtsTextBold text-xs text-gray-700">Attached automatically</h4>
           <ul className="mt-1 space-y-0.5 pl-5">
             {draft.evidence.map((item) => (
-              <li key={item} className="list-item list-disc body-small text-gray-800">
+              <li key={item} className="list-item list-disc text-sm tracking-wide text-gray-800">
                 {item}
               </li>
             ))}
@@ -64,14 +64,14 @@ export const CaseDraftCard = ({ draft }: { draft: CaseDraftInput }) => {
             <h4 className="electronicArtsTextBold text-xs text-gray-700">Steps you already tried</h4>
             <ul className="mt-1 space-y-0.5 pl-5">
               {draft.stepsTried.map((step) => (
-                <li key={step} className="list-item list-disc body-small text-gray-800">
+                <li key={step} className="list-item list-disc text-sm tracking-wide text-gray-800">
                   {step}
                 </li>
               ))}
             </ul>
           </div>
         )}
-        <p className="body-small text-gray-500">
+        <p className="text-sm tracking-wide text-gray-500">
           No screenshots needed. EA already has your platform and game details.
         </p>
       </div>
@@ -97,7 +97,7 @@ export const CaseDraftCard = ({ draft }: { draft: CaseDraftInput }) => {
             </Button>
           </>
         ) : (
-          <p role="status" className="body-small text-gray-600">
+          <p role="status" className="text-sm tracking-wide text-gray-600">
             {draftState === 'sent'
               ? 'Sent. An advisor will pick this up from here.'
               : 'Not sent. Tap "Talk to a person" whenever you want an advisor.'}

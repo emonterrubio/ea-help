@@ -8,7 +8,7 @@ import { useHelpAgent } from '../agentContext';
 type FactorState = 'idle' | 'checking' | 'failed' | 'passed';
 
 const Passed = ({ label }: { label: string }) => (
-  <p className="flex items-center gap-x-2 body-small text-green-800">
+  <p className="flex items-center gap-x-2 text-sm tracking-wide text-green-800">
     <MdCheckCircle className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
     {label}
   </p>
@@ -47,7 +47,7 @@ const EmailCodeFactor = ({ sessionId, onPassed }: FactorProps) => {
       <label htmlFor={inputId} className="electronicArtsTextBold text-sm text-gray-900">
         Enter the 6-digit code we emailed you
       </label>
-      <p className="body-small text-gray-500" data-demo-chrome>
+      <p className="text-sm tracking-wide text-gray-500" data-demo-chrome>
         Prototype: the code is {DEMO_EMAIL_CODE}
       </p>
       <div className="flex flex-wrap gap-2">
@@ -60,7 +60,7 @@ const EmailCodeFactor = ({ sessionId, onPassed }: FactorProps) => {
           onChange={(event) => setCode(event.target.value)}
           aria-invalid={state === 'failed'}
           aria-describedby={state === 'failed' ? errorId : undefined}
-          className="w-32 rounded-md border border-solid border-gray-300 px-2.5 py-1.5 body-small outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+          className="w-32 rounded-md border border-solid border-gray-300 px-2.5 py-1.5 text-sm tracking-wide outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
         />
         <Button
           type="submit"
@@ -73,7 +73,7 @@ const EmailCodeFactor = ({ sessionId, onPassed }: FactorProps) => {
         </Button>
       </div>
       {state === 'failed' && (
-        <p id={errorId} role="alert" className="body-small text-rose-800">
+        <p id={errorId} role="alert" className="text-sm tracking-wide text-rose-800">
           That code doesn&apos;t match. Check the latest email from EA and try again.
         </p>
       )}
@@ -111,7 +111,7 @@ const PurchaseFactor = ({ sessionId, onPassed }: FactorProps) => {
                   onChange={() => setAnswer(option.value)}
                   className="h-4 w-4 accent-blue-700"
                 />
-                <label htmlFor={id} className="body-small text-gray-800">
+                <label htmlFor={id} className="text-sm tracking-wide text-gray-800">
                   {option.label}
                 </label>
               </div>
@@ -131,7 +131,7 @@ const PurchaseFactor = ({ sessionId, onPassed }: FactorProps) => {
         </Button>
       </div>
       {state === 'failed' && (
-        <p role="alert" className="mt-1.5 body-small text-rose-800">
+        <p role="alert" className="mt-1.5 text-sm tracking-wide text-rose-800">
           That isn&apos;t a recent purchase on this account. Try again.
         </p>
       )}
@@ -156,10 +156,10 @@ export const IdentityCheckCard = ({ sessionId }: { sessionId: string }) => {
 
   return (
     <section aria-label="Confirm it's you" className="rounded-lg bg-white p-4 ring-1 ring-amber-300">
-      <p className="eyebrow-default text-amber-900">
+      <p className="text-xs font-bold uppercase leading-6 tracking-wider text-amber-900">
         Confirm it&apos;s you · {passedCount} of {FACTOR_COUNT} done
       </p>
-      <p className="mb-3 body-small text-gray-600">We&apos;ll never ask for your password.</p>
+      <p className="mb-3 text-sm tracking-wide text-gray-600">We&apos;ll never ask for your password.</p>
       <div className="space-y-4">
         <EmailCodeFactor sessionId={sessionId} onPassed={onPassed} />
         <PurchaseFactor sessionId={sessionId} onPassed={onPassed} />

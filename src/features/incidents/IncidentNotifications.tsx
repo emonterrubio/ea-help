@@ -55,7 +55,7 @@ export const IncidentNotifications = () => {
           <MdNotificationsActive className="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-700" aria-hidden="true" />
           <div className="min-w-0 flex-1">
             <p className="electronicArtsTextBold text-sm text-gray-900">Update on an issue you follow</p>
-            <p className="mt-1 body-small text-gray-700">
+            <p className="mt-1 text-sm tracking-wide text-gray-700">
               {toast.title}: {INCIDENT_STATUS_LABELS[toast.status]}.
             </p>
           </div>

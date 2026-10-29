@@ -33,14 +33,14 @@ const TimelineItem = ({ entry }: { entry: TimelineEntry }) => {
           {channel.label}
         </span>
         <span className="electronicArtsTextBold text-sm text-gray-900">{entry.author}</span>
-        <span className="body-small text-gray-500">{entry.at}</span>
+        <span className="text-sm tracking-wide text-gray-500">{entry.at}</span>
       </div>
       <p className="mt-1 electronicArtsTextBold text-sm text-gray-800">{entry.title}</p>
-      {entry.body && <p className="mt-1 body-small text-gray-700">{entry.body}</p>}
+      {entry.body && <p className="mt-1 text-sm tracking-wide text-gray-700">{entry.body}</p>}
       {entry.details && entry.details.length > 0 && (
         <ul className="mt-1 pl-5">
           {entry.details.map((detail) => (
-            <li key={detail} className="list-item list-disc body-small text-gray-700">
+            <li key={detail} className="list-item list-disc text-sm tracking-wide text-gray-700">
               {detail}
             </li>
           ))}

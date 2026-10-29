@@ -26,21 +26,21 @@ export const ActionPreviewCard = ({ action, title, details, changes, confirmLabe
 
   return (
     <section aria-label={`Preview: ${title}`} className="rounded-lg bg-white p-4 ring-1 ring-amber-300">
-      <p className="eyebrow-default text-amber-900">Review before anything changes</p>
+      <p className="text-xs font-bold uppercase leading-6 tracking-wider text-amber-900">Review before anything changes</p>
       <h3 className="electronicArtsTextBold text-base text-gray-900">{title}</h3>
       {/* dt/dd carry the type classes: the legacy reset styles those elements directly. */}
       <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
         {details.map((detail) => (
           <div key={detail.label} className="contents">
-            <dt className="body-small text-gray-500">{detail.label}</dt>
-            <dd className="body-small text-gray-900">{detail.value}</dd>
+            <dt className="text-sm tracking-wide text-gray-500">{detail.label}</dt>
+            <dd className="text-sm tracking-wide text-gray-900">{detail.value}</dd>
           </div>
         ))}
       </dl>
       <h4 className="mt-3 electronicArtsTextBold text-xs text-gray-700">What will change</h4>
       <ul className="mt-1 space-y-0.5 pl-5">
         {changes.map((change) => (
-          <li key={change} className="list-item list-disc body-small text-gray-800">
+          <li key={change} className="list-item list-disc text-sm tracking-wide text-gray-800">
             {change}
           </li>
         ))}
@@ -67,7 +67,7 @@ export const ActionPreviewCard = ({ action, title, details, changes, confirmLabe
             </Button>
           </>
         ) : (
-          <p role="status" className="body-small text-gray-600">
+          <p role="status" className="text-sm tracking-wide text-gray-600">
             {previewState === 'confirmed' ? 'Confirmed.' : 'Nothing was changed.'}
           </p>
         )}

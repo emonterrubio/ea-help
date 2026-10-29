@@ -12,7 +12,7 @@ const LinkList = ({ title, items }: LinkListProps) => (
     <ul>
       {items.map((item) => (
         <li key={item} className="mb-1">
-          <PlaceholderLink className="body-default hover:underline underline-offset-2 decoration-2 decoration-sky-500 pointer">
+          <PlaceholderLink className="text-base leading-5 tracking-wide hover:underline underline-offset-2 decoration-2 decoration-sky-500 pointer">
             {item}
             <br />
           </PlaceholderLink>

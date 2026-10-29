@@ -19,7 +19,7 @@ export const CardArticles = ({ eyebrow, title, preview, buttonLabel }: CardArtic
           <h3 className="electronicArtsDisplayBold text-lg tracking-wide leading-snug">{title}</h3>
         </div>
         <div>
-          <p className="body-small text-slate-600">{preview}</p>
+          <p className="text-sm tracking-wide text-slate-600">{preview}</p>
         </div>
       </div>
     </div>

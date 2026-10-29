@@ -109,10 +109,10 @@ export const Search = ({ placeholder, gameTitle }: SearchProps) => {
               key={article.id}
               role="option"
               aria-selected={false}
-              className="bg-white body-default py-2 px-3 border-b border-solid border-slate-200 last-of-type:border-0 hover:bg-slate-100 hover:text-blue-600 cursor-pointer"
+              className="bg-white text-base leading-5 tracking-wide py-2 px-3 border-b border-solid border-slate-200 last-of-type:border-0 hover:bg-slate-100 hover:text-blue-600 cursor-pointer"
             >
-              <p className="body-small text-slate-500">{capitalizeFirstLetter(article.product)}</p>
-              <p className="body-default">{capitalizeFirstLetter(article.title)}</p>
+              <p className="text-sm tracking-wide text-slate-500">{capitalizeFirstLetter(article.product)}</p>
+              <p className="text-base leading-5 tracking-wide">{capitalizeFirstLetter(article.title)}</p>
             </li>
           ))}
         </ul>

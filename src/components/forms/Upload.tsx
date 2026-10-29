@@ -14,7 +14,7 @@ export const Upload = () => {
           <div className="flex mt-1">
             <label
               htmlFor={inputId}
-              className="relative cursor-pointer bg-white rounded-md body-default font-medium text-blue-600 hover:text-blue-800 focus-within:outline focus-within:outline-2 focus-within:outline-blue-600"
+              className="relative cursor-pointer bg-white rounded-md text-base leading-5 tracking-wide font-medium text-blue-600 hover:text-blue-800 focus-within:outline focus-within:outline-2 focus-within:outline-blue-600"
             >
               <span>Upload a file</span>
               <input
@@ -26,10 +26,10 @@ export const Upload = () => {
                 aria-describedby={hintId}
               />
             </label>
-            <p className="pl-1 body-default">or drag and drop</p>
+            <p className="pl-1 text-base leading-5 tracking-wide">or drag and drop</p>
           </div>
           <div>
-            <p id={hintId} className="body-small text-center text-gray-500">
+            <p id={hintId} className="text-sm tracking-wide text-center text-gray-500">
               PNG, JPG, GIF up to 10MB
             </p>
           </div>

@@ -7,7 +7,7 @@ interface NotFoundMessageProps {
 /** Shown when a details URL references an id that does not exist. */
 export const NotFoundMessage = ({ entity }: NotFoundMessageProps) => (
   <div className="my-8" role="alert">
-    <p className="body-default mb-4">We couldn’t find that {entity}.</p>
+    <p className="text-base leading-5 tracking-wide mb-4">We couldn’t find that {entity}.</p>
     <BackButton />
   </div>
 );

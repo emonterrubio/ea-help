@@ -12,7 +12,7 @@ export const ContactUs = ({ buttonLabel }: ContactUsProps) => (
       <h2 className="electronicArtsDisplayBold tracking-wide text-2xl">
         {capitalizeFirstLetter("Can't find what you are looking for?")}
       </h2>
-      <p className="mt-1 body-default">
+      <p className="mt-1 text-base leading-5 tracking-wide">
         {capitalizeFirstLetter("Save time by starting your support request online and we'll connect you to an expert.")}
       </p>
     </div>

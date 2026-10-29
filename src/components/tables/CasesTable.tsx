@@ -34,23 +34,23 @@ const CaseRow = ({ supportCase }: { supportCase: SupportCase }) => {
         {/* Stacked details for small screens */}
         <dl className="font-base lg:hidden">
           <dt className="sr-only">Game</dt>
-          <dd className="mt-1 truncate body-small">{supportCase.game}</dd>
+          <dd className="mt-1 truncate text-sm tracking-wide">{supportCase.game}</dd>
           <dt className="sr-only">Platform</dt>
-          <dd className="truncate body-small">{supportCase.platform}</dd>
+          <dd className="truncate text-sm tracking-wide">{supportCase.platform}</dd>
           <dt className="sr-only">Status</dt>
           <dd className="mt-1 truncate">
             <StatusChip supportCase={supportCase} />
           </dd>
         </dl>
       </td>
-      <td className="w-fit hidden px-3 py-4 body-small lg:table-cell">{supportCase.game}</td>
-      <td className="w-fit hidden px-3 py-4 body-small lg:table-cell">{supportCase.platform}</td>
+      <td className="w-fit hidden px-3 py-4 text-sm tracking-wide lg:table-cell">{supportCase.game}</td>
+      <td className="w-fit hidden px-3 py-4 text-sm tracking-wide lg:table-cell">{supportCase.platform}</td>
       <td className="w-fit hidden px-3 lg:table-cell">
         <StatusChip supportCase={supportCase} />
       </td>
-      <td className="w-fit px-3 py-4 body-small lg:table-cell">{supportCase.case}</td>
-      <td className="w-fit px-3 py-4 body-small lg:table-cell">{supportCase.date}</td>
-      <td className="w-fit px-3 py-4 body-small lg:table-cell">{supportCase.dateUpdate}</td>
+      <td className="w-fit px-3 py-4 text-sm tracking-wide lg:table-cell">{supportCase.case}</td>
+      <td className="w-fit px-3 py-4 text-sm tracking-wide lg:table-cell">{supportCase.date}</td>
+      <td className="w-fit px-3 py-4 text-sm tracking-wide lg:table-cell">{supportCase.dateUpdate}</td>
       <td className="w-fit pl-3 pr-4 lg:table-cell">
         <Button
           buttonStyle="btn-terciary-solid"

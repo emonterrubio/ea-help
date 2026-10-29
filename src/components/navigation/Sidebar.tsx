@@ -52,7 +52,7 @@ export const Sidebar = () => {
                         aria-current={isActive ? 'page' : undefined}
                         className={`row ${isActive ? 'is-active' : ''}`}
                       >
-                        <span className="flex flex-row body-default">
+                        <span className="flex flex-row text-base leading-5 tracking-wide">
                           <span className="pr-3">
                             <item.icon className="h-5 w-5" aria-hidden="true" />
                           </span>

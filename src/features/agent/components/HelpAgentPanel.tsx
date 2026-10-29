@@ -52,7 +52,7 @@ export const HelpAgentPanel = () => {
             >
               EA Help Agent <AiBadge />
             </h2>
-            <p className="body-small text-gray-500">AI assistant · {mode === 'live' ? 'Live' : 'Demo mode'}</p>
+            <p className="text-sm tracking-wide text-gray-500">AI assistant</p>
           </div>
         </div>
         <div className="flex flex-shrink-0 items-center gap-x-1">
@@ -77,7 +77,7 @@ export const HelpAgentPanel = () => {
       </header>
       {context && <ContextStrip context={context} />}
       <div className="flex-1 overflow-y-auto px-4 py-4">
-        <ConversationLog items={state.items} />
+        <ConversationLog items={state.items} isRunning={state.isRunning} />
         {!hasPlayerMessages && !state.isRunning && context && (
           <div className="mt-4">
             <SuggestedPrompts onPick={send} />
@@ -86,7 +86,7 @@ export const HelpAgentPanel = () => {
       </div>
       <footer className="border-0 border-t border-solid border-gray-200 px-4 py-3">
         <AgentComposer onSend={send} disabled={state.isRunning} initialValue={prefill} allowImages={mode === 'live'} />
-        <p className="mt-2 body-small text-gray-500">
+        <p className="mt-2 text-xs tracking-wide text-gray-500">
           The agent is AI and can make mistakes. It always asks before changing your account.
         </p>
       </footer>

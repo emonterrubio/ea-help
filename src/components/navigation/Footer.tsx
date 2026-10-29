@@ -10,11 +10,11 @@ export const Footer = () => (
         <img className="block h-8 w-auto sm:m-0 ml-2 pr-2 mb-4" src={logo} alt="EA logo" />
         {footerLinks.map((name) => (
           <div key={name} className="px-3 py-2">
-            <PlaceholderLink className="body-default text-gray-500 hover:text-gray-900">{name}</PlaceholderLink>
+            <PlaceholderLink className="text-base leading-5 tracking-wide text-gray-500 hover:text-gray-900">{name}</PlaceholderLink>
           </div>
         ))}
       </nav>
-      <p className="mt-4 text-center body-default text-gray-400">&copy; 2022 Electronic Arts Inc.</p>
+      <p className="mt-4 text-center text-base leading-5 tracking-wide text-gray-400">&copy; 2022 Electronic Arts Inc.</p>
     </div>
   </footer>
 );
