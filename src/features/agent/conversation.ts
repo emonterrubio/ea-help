@@ -3,7 +3,7 @@ import type { AgentCard, AgentEvent, Citation } from '@/agent/protocol';
 
 /** Everything the conversation log can show, in order. */
 export type ConversationItem =
-  | { kind: 'user'; id: string; text: string }
+  | { kind: 'user'; id: string; text: string; attachment?: string }
   | { kind: 'status'; id: string; text: string; state: 'active' | 'complete' }
   | { kind: 'message'; id: string; text: string; citations?: Citation[]; level?: AutonomyLevel }
   | { kind: 'card'; id: string; card: AgentCard; level: AutonomyLevel }
@@ -27,7 +27,7 @@ export interface ConversationState {
 export type ConversationAction =
   | { type: 'open' }
   | { type: 'close' }
-  | { type: 'user_message'; id: string; text: string }
+  | { type: 'user_message'; id: string; text: string; attachment?: string }
   | { type: 'run_started' }
   | { type: 'agent_event'; event: AgentEvent }
   | { type: 'run_finished' };
@@ -64,7 +64,10 @@ export const conversationReducer = (state: ConversationState, action: Conversati
     case 'close':
       return { ...state, isOpen: false };
     case 'user_message':
-      return { ...state, items: [...state.items, { kind: 'user', id: action.id, text: action.text }] };
+      return {
+        ...state,
+        items: [...state.items, { kind: 'user', id: action.id, text: action.text, attachment: action.attachment }],
+      };
     case 'run_started':
       return { ...state, isRunning: true };
     case 'agent_event':

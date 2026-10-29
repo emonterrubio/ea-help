@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { MdCheckCircleOutline, MdOutlineWarningAmber } from 'react-icons/md';
+import { Alert } from '@/components/alert/Alert';
 import { INCIDENT_STATUS_LABELS, incidentExpectation } from '@/services/ea-api/incidentStatus';
 import type { Incident } from '@/services/ea-api/types';
 import { FollowIncidentButton } from './FollowIncidentButton';
@@ -12,47 +13,43 @@ interface IncidentNoticeProps {
   action?: ReactNode;
 }
 
-/** Known-issue status with ETA and a follow toggle. Used as a page banner and an agent card. */
-export const IncidentNotice = ({ incident, headingLevel: Heading = 'h3', action }: IncidentNoticeProps) => {
+/** Known-issue alert. Same shell as the info alert, with warning or success severity. */
+export const IncidentNotice = ({ incident, headingLevel = 'h3', action }: IncidentNoticeProps) => {
   const isResolved = incident.status === 'resolved';
   const expectation = incidentExpectation(incident.status, incident.eta);
   const Icon = isResolved ? MdCheckCircleOutline : MdOutlineWarningAmber;
+  const showFollow = !isResolved;
 
   return (
-    <section
-      aria-label={`Known issue: ${incident.title}`}
-      className={`rounded-md border-0 border-l-4 border-solid p-4 ${
-        isResolved ? 'border-green-600 bg-green-50' : 'border-amber-500 bg-amber-50'
-      }`}
-    >
-      <div className="flex gap-x-3">
-        <Icon
-          className={`mt-0.5 h-5 w-5 flex-shrink-0 ${isResolved ? 'text-green-700' : 'text-amber-700'}`}
-          aria-hidden="true"
-        />
-        <div className="min-w-0 flex-1">
-          <p className="eyebrow-default text-gray-600">Known issue</p>
-          <Heading className="electronicArtsTextBold text-base text-gray-900">{incident.title}</Heading>
-          <p className="mt-1 body-small text-gray-700">{incident.summary}</p>
-          {/* dt/dd carry the type classes: the legacy reset styles those elements directly. */}
-          <dl className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-gray-700">
-            <div>
-              <dt className="inline electronicArtsTextBold text-sm leading-5 tracking-wide">Status: </dt>
-              <dd className="inline body-small">{INCIDENT_STATUS_LABELS[incident.status]}</dd>
-            </div>
-            {expectation && (
-              <div>
-                <dt className="inline electronicArtsTextBold text-sm leading-5 tracking-wide">Next: </dt>
-                <dd className="inline body-small">{expectation}</dd>
-              </div>
-            )}
-          </dl>
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            {!isResolved && <FollowIncidentButton incidentId={incident.id} />}
+    <Alert
+      severity={isResolved ? 'success' : 'warning'}
+      icon={<Icon className="h-6 w-6" aria-hidden="true" />}
+      title="Known issue"
+      headingLevel={headingLevel}
+      label={`Known issue: ${incident.title}`}
+      actions={
+        showFollow || action != null ? (
+          <>
+            {showFollow && <FollowIncidentButton incidentId={incident.id} />}
             {action}
-          </div>
-        </div>
+          </>
+        ) : undefined
+      }
+    >
+      <p className="mt-1 electronicArtsTextBold text-base">{incident.title}</p>
+      <p className="mt-1 body-small">{incident.summary}</p>
+      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+        <p className="body-small">
+          <span className="electronicArtsTextBold">Status: </span>
+          {INCIDENT_STATUS_LABELS[incident.status]}
+        </p>
+        {expectation && (
+          <p className="body-small">
+            <span className="electronicArtsTextBold">Next: </span>
+            {expectation}
+          </p>
+        )}
       </div>
-    </section>
+    </Alert>
   );
 };

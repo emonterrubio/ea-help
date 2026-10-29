@@ -1,5 +1,12 @@
 import type { IconType } from 'react-icons';
-import { MdAutoAwesome, MdChatBubbleOutline, MdInfoOutline, MdLanguage, MdMailOutline } from 'react-icons/md';
+import {
+  MdAutoAwesome,
+  MdChatBubbleOutline,
+  MdInfoOutline,
+  MdLanguage,
+  MdMailOutline,
+  MdReceiptLong,
+} from 'react-icons/md';
 import type { TimelineChannel, TimelineEntry } from '@/services/ea-api/types';
 
 const CHANNELS: Record<TimelineChannel, { label: string; icon: IconType; tone: string }> = {
@@ -8,6 +15,7 @@ const CHANNELS: Record<TimelineChannel, { label: string; icon: IconType; tone: s
   chat: { label: 'Chat', icon: MdChatBubbleOutline, tone: 'bg-green-100 text-green-800' },
   email: { label: 'Email', icon: MdMailOutline, tone: 'bg-amber-100 text-amber-900' },
   system: { label: 'Update', icon: MdInfoOutline, tone: 'bg-gray-100 text-gray-700' },
+  receipt: { label: 'Receipt', icon: MdReceiptLong, tone: 'bg-violet-100 text-violet-800' },
 };
 
 const TimelineItem = ({ entry }: { entry: TimelineEntry }) => {

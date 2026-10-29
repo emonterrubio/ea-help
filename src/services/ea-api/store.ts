@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from 'react';
 import { createExternalStore, safeStorage } from '@/lib/externalStore';
 import type { AgentCase } from './cases';
-import type { Grant, IncidentStatus } from './types';
+import type { ActionReceipt, Grant, IdentityFactor, IncidentStatus } from './types';
 
 /** Mutable demo state layered on top of the static fixtures. */
 export interface DemoState {
@@ -12,6 +12,10 @@ export interface DemoState {
   incidentStatus: Record<string, IncidentStatus>;
   /** Cases drafted by the Help Agent and sent by the player (newest first). */
   createdCases: AgentCase[];
+  /** Receipts for every change applied after a player tap (L2), oldest first. */
+  receipts: ActionReceipt[];
+  /** Identity checks passed per recovery session; cleared once a reset is applied. */
+  verifiedFactors: Record<string, IdentityFactor[]>;
 }
 
 export const DEMO_STATE_STORAGE_KEY = 'ea-help:demo-state';
@@ -22,10 +26,12 @@ export const emptyDemoState = (): DemoState => ({
   followedIncidentIds: [],
   incidentStatus: {},
   createdCases: [],
+  receipts: [],
+  verifiedFactors: {},
 });
 
-type StoredDemoState = Omit<DemoState, 'incidentStatus' | 'createdCases'> &
-  Partial<Pick<DemoState, 'incidentStatus' | 'createdCases'>>;
+type LaterFields = 'incidentStatus' | 'createdCases' | 'receipts' | 'verifiedFactors';
+type StoredDemoState = Omit<DemoState, LaterFields> & Partial<Pick<DemoState, LaterFields>>;
 
 const isStoredDemoState = (value: unknown): value is StoredDemoState =>
   typeof value === 'object' &&

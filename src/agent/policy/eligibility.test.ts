@@ -2,7 +2,8 @@ import { demoPurchases } from '@/services/ea-api/fixtures';
 import type { Grant, Purchase } from '@/services/ea-api/types';
 import { DEFAULT_RESTORE_POLICY, evaluateRestoreEligibility } from './eligibility';
 
-const NOW = new Date('2026-10-28T12:00:00Z');
+// Fixture purchase times are relative to load, so the policy is checked against now.
+const NOW = new Date();
 const purchase = (id: string): Purchase => {
   const found = demoPurchases.find((item) => item.id === id);
   if (!found) throw new Error(`fixture ${id} missing`);

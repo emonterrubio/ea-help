@@ -49,8 +49,12 @@ src/features/flags/      useAiLayer(): ?ai=on|off + localStorage; off = untouche
 src/features/agent/      Help Agent UI: provider/reducer, <dialog> panel, launcher, cards
 src/features/demo-controls/  prototype-only toggle/reset dock (data-demo-chrome)
 src/agent/protocol.ts    event contract shared by the demo and live engines
-src/agent/policy/        deterministic rules: autonomy levels L0–L3, eligibility, risk
+src/agent/policy/        deterministic rules: autonomy levels L0–L3, eligibility, fixes, risk
+src/agent/actions/       L2 executor: re-checks policy, applies, writes receipts; undo
 src/agent/demo/          scenario registry, intent router, scripted demo engine
+src/agent/live/          live engine: browser tool loop, tool handlers, citations, transport
+api/agent.ts             Vercel function: one Claude turn per request (key, prompt, tools, limits)
+evals/                   golden-set eval for the live agent (opt-in, calls the real API)
 src/services/ea-api/     mock EA Help APIs + persisted demo store (reset from the dock)
 ```
 
@@ -82,7 +86,18 @@ Import with the `@/` alias (maps to `src/`).
   into an engine, never into components.
 - Eligibility and risk decisions live in `src/agent/policy/` as pure, tested functions.
   The model never decides whether an account change is allowed, and L2 actions always
-  need a player tap.
+  need a player tap. Engines only _propose_ actions (`action_preview` cards); the browser
+  runs them through `executeAction`, which re-checks the rules and writes a receipt.
+- The live model only picks tools; the handlers in `src/agent/live/tools.ts` run in the
+  browser. Tool names live in three places that a test keeps in sync: `AGENT_TOOLS`
+  (api/agent.ts), `TOOL_LEVELS` (policy/autonomy.ts) and `TOOL_HANDLERS`. Card
+  interactions and safety triggers never go through the model.
+- `api/agent.ts` must stay self-contained (no imports from `src/`): Vercel bundles it on
+  its own. Changing the system prompt or tools invalidates the prompt cache.
+- Live mode needs `ANTHROPIC_API_KEY` (in `.env.local` for `npm run dev`). Without it,
+  or with `?agent=demo`, the app uses the demo engine. Tests always use the demo engine
+  or a fake transport. The golden-set eval spends money: run it only when asked,
+  with `AGENT_EVAL=1 npx vitest run evals`.
 - Demo scenarios are deep-linkable (`/?scenario=<id>`). Every scenario's sample prompt
   must route to itself (enforced by `router.test.ts`). `/demo` lists them (unlisted route).
 

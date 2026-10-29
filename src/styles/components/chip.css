@@ -1,6 +1,6 @@
 @layer components {
   .chip {
-    font-family: 'ElectronicArtsDisplayRegular', sans-serif;
+    font-family: var(--font-family-sans);
     line-height: normal;
     letter-spacing: 0.05rem;
     font-weight: normal;

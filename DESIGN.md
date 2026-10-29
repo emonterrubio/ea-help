@@ -40,22 +40,26 @@ colors in tokens. Use Tailwind colors for neutral scaffolding.
 
 ## 3. Typography
 
-Brand typefaces are self-hosted WOFF2 files in `src/assets/fonts`, registered in
-[`src/styles/fonts.css`](src/styles/fonts.css) with `font-display: swap`. Each weight is a
-separate family (legacy convention), so pick a weight by class, not `font-weight`.
+The base typeface is [Inter](https://fonts.google.com/specimen/Inter), loaded from Google
+Fonts in `index.html`. [`src/styles/fonts.css`](src/styles/fonts.css) defines
+`--font-family-sans`. Tailwind's `font-sans` uses the same stack. The `electronicArts*`
+class names are legacy; Display and Text both resolve to Inter, and the suffix sets
+`font-weight`.
 
-| Class                          | Family                        | Use                               |
-| ------------------------------ | ----------------------------- | --------------------------------- |
-| `electronicArtsDisplayBold`    | EA Display Bold               | Section titles, card titles       |
-| `electronicArtsDisplayRegular` | EA Display Regular            | Hero titles, banner titles, chips |
-| `electronicArtsTextBold`       | EA Text Bold                  | Labels, table headers, emphasis   |
-| `electronicArtsTextRegular`    | EA Text Regular               | Form labels, hero subtitles       |
-| `body-default`                 | Text Regular, 16/20           | Paragraph copy                    |
-| `body-small`                   | Text Regular, 14/20           | Secondary copy, metadata          |
-| `eyebrow-default`              | Text Regular, 12/24 uppercase | Eyebrows                          |
+| Class                          | Weight               | Use                               |
+| ------------------------------ | -------------------- | --------------------------------- |
+| `electronicArtsDisplayBold`    | 700                  | Section titles, card titles       |
+| `electronicArtsDisplayRegular` | 400                  | Hero titles, banner titles, chips |
+| `electronicArtsTextBold`       | 700                  | Labels, table headers, emphasis   |
+| `electronicArtsTextRegular`    | 400                  | Form labels, hero subtitles       |
+| `electronicArtsTextLight`      | 300                  | Light text                        |
+| `electronicArtsDisplayLight`   | 300                  | Light display text                |
+| `body-default`                 | 400, 16/20           | Paragraph copy                    |
+| `body-small`                   | 400, 14/20           | Secondary copy, metadata          |
+| `eyebrow-default`              | 700, 12/24 uppercase | Eyebrows                          |
 
 Sizes come from Tailwind (`text-xl`, `sm:text-6xl` …). Elements without a type class
-fall back to the reset font (Arial), as in the legacy app.
+use Inter through the reset.
 
 ## 4. Layout
 
@@ -134,15 +138,20 @@ Rules of thumb:
 
 The Help Agent follows the PRD's agentic design principles. Reuse these pieces:
 
-| Pattern          | Component                                             | Rule                                                                              |
-| ---------------- | ----------------------------------------------------- | --------------------------------------------------------------------------------- |
-| Identify as AI   | `AiBadge`, panel subtitle, first message              | Always visible; the agent never imitates an advisor                               |
-| Show the work    | `StatusLine`                                          | One short present-tense line per tool call; spinner while active, check when done |
-| Explain the why  | `AgentMessage` citations                              | Every answer or action cites an article, purchase record or policy                |
-| Autonomy         | `AutonomyBadge` (L0 slate, L1 sky, L2 amber, L3 rose) | Shown on every agent response                                                     |
-| Escape hatch     | "Talk to a person" in the panel header                | Never hidden or disabled except while a request is running                        |
-| Warm handoff     | `HandoffNotice`                                       | States the advisor is a person and shows what they already know                   |
-| Context pre-fill | `ContextStrip`                                        | Shows what the agent already knows so the player never re-enters it               |
+| Pattern           | Component                                             | Rule                                                                              |
+| ----------------- | ----------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Identify as AI    | `AiBadge`, panel subtitle, first message              | Always visible; the agent never imitates an advisor                               |
+| Show the work     | `StatusLine`                                          | One short present-tense line per tool call; spinner while active, check when done |
+| Explain the why   | `AgentMessage` citations                              | Every answer or action cites an article, purchase record or policy                |
+| Autonomy          | `AutonomyBadge` (L0 slate, L1 sky, L2 amber, L3 rose) | Shown on every agent response                                                     |
+| Escape hatch      | "Talk to a person" in the panel header                | Never hidden or disabled except while a request is running                        |
+| Warm handoff      | `HandoffNotice`                                       | States the advisor is a person and shows what they already know                   |
+| Context pre-fill  | `ContextStrip`                                        | Shows what the agent already knows so the player never re-enters it               |
+| Act with confirm  | `ActionPreviewCard`, `OneClickFixPanel` (amber)       | Lists exactly what will change; nothing happens until the player taps confirm     |
+| Receipts & undo   | `ReceiptCard` (green), `ReceiptUndoPanel`             | Every L2 change shows a reference ID; reversible changes offer undo               |
+| Verify, don't ask | `IdentityCheckCard`, `SecurityChecklistCard`          | Never ask for a password; EA checks the answers and the agent sees pass or fail   |
+| Engine honesty    | Panel subtitle ("Live" / "Demo mode")                 | Says which engine is answering; switches to "Demo mode" on any fallback           |
+| Show, don't type  | `AgentComposer` screenshot attach (live mode only)    | Attach, paste or drop a screenshot; the agent reads it instead of asking          |
 
 The panel is a native `<dialog>` opened with `showModal()`: a side sheet ≥640px, full
 screen below. Focus is contained, Esc closes it, and focus returns to the launcher.

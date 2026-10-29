@@ -1,7 +1,7 @@
 @layer components {
   .alert {
     position: relative;
-    font-family: 'ElectronicArtsTextRegular', sans-serif;
+    font-family: var(--font-family-sans);
     line-height: normal;
     border: none;
     outline: none;
@@ -14,7 +14,8 @@
     color: var(--nova-color-gray90);
   }
   .alert-title {
-    font-family: 'ElectronicArtsTextBold';
+    font-family: var(--font-family-sans);
+    font-weight: 700;
     line-height: normal;
     border: none;
   }

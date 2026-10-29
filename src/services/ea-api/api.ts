@@ -2,8 +2,17 @@ import games from '@/data/games';
 import type { Game } from '@/types/domain';
 import { demoIncidents, demoPlayer, demoPurchases } from './fixtures';
 import { simulateLatency } from './latency';
+import { createReferenceId, recordReceipt } from './receipts';
 import { getDemoState, updateDemoState } from './store';
-import type { EntitlementStatus, Grant, Incident, IncidentStatus, PlayerProfile, Purchase } from './types';
+import type {
+  ActionReceipt,
+  EntitlementStatus,
+  Grant,
+  Incident,
+  IncidentStatus,
+  PlayerProfile,
+  Purchase,
+} from './types';
 
 /*
  * Mock EA Help APIs. Every function only ever touches the signed-in demo player's
@@ -46,12 +55,6 @@ export const getEntitlementStatus = async (purchaseId: string): Promise<Entitlem
   return entitlementStatusFor(purchase, getDemoState().grants);
 };
 
-const createReferenceId = (now: Date): string =>
-  `EAR-${now.getTime().toString(36).toUpperCase()}-${Math.floor(Math.random() * 1296)
-    .toString(36)
-    .toUpperCase()
-    .padStart(2, '0')}`;
-
 /**
  * Grants a missing entitlement and records a receipt. Callers must run the
  * eligibility rules first (the agent's `executeAction` does).
@@ -82,6 +85,40 @@ export const undoGrant = async (referenceId: string, now = new Date()): Promise<
       grant.referenceId === referenceId && !grant.undoneAt ? { ...grant, undoneAt: now.toISOString() } : grant,
     ),
   }));
+};
+
+/** Grants recorded for the player (feeds the daily restore cap). */
+export const listGrants = async (): Promise<Grant[]> => {
+  await simulateLatency();
+  return getDemoState().grants;
+};
+
+const gameTitle = (gameId: string): string => games.find((game) => game.id === gameId)?.title ?? 'game';
+
+/** One-click fix: re-syncs the player's licenses for a game. Callers run the fix policy first. */
+export const refreshEntitlements = async (gameId: string, now = new Date()): Promise<ActionReceipt> => {
+  await simulateLatency();
+  return recordReceipt({
+    referenceId: createReferenceId(now),
+    kind: 'refresh_entitlements',
+    subject: gameId,
+    title: `Refreshed your ${gameTitle(gameId)} licenses`,
+    appliedAt: now.toISOString(),
+    undoable: false,
+  });
+};
+
+/** One-click fix: clears a game's cached cloud settings (progress and unlocks are kept). */
+export const resetCloudSave = async (gameId: string, now = new Date()): Promise<ActionReceipt> => {
+  await simulateLatency();
+  return recordReceipt({
+    referenceId: createReferenceId(now),
+    kind: 'reset_cloud_save',
+    subject: gameId,
+    title: `Reset the ${gameTitle(gameId)} cloud settings cache`,
+    appliedAt: now.toISOString(),
+    undoable: false,
+  });
 };
 
 /** Incident fixtures with live status changes applied. */

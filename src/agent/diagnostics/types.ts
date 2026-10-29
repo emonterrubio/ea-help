@@ -1,3 +1,5 @@
+import type { FixKind } from '../policy/fixes';
+
 /**
  * Diagnostic decision trees are authored by support content teams. The agent picks
  * the tree and the path from the player's answers; it never invents fixes.
@@ -8,11 +10,21 @@ export interface DiagnosticQuestion {
   options: { value: string; label: string }[];
 }
 
+/** A step the agent can apply for the player after they confirm (L2). */
+export interface OneClickFix {
+  kind: FixKind;
+  /** Button text, e.g. "Refresh my licenses". */
+  label: string;
+  /** Exactly what the fix changes, shown before the player confirms. */
+  changes: string[];
+}
+
 export interface DiagnosticStep {
   id: string;
   title: string;
   /** Instructions written for the player's platform. */
   body: string;
+  fix?: OneClickFix;
 }
 
 export interface DiagnosticTree {
@@ -32,6 +44,8 @@ export interface DiagnosticLogEntry {
   stepId: string;
   title: string;
   outcome: StepOutcome;
+  /** Receipt reference when the step's one-click fix was applied. */
+  reference?: string;
 }
 
 /** What the player did in a diagnostic flow, attached to any case it creates. */

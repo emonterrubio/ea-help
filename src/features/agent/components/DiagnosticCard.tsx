@@ -4,6 +4,7 @@ import { findTree } from '@/agent/diagnostics/trees';
 import type { DiagnosticLogEntry, DiagnosticTree, StepOutcome } from '@/agent/diagnostics/types';
 import { Button } from '@/components/ui/Button';
 import { useHelpAgent } from '../agentContext';
+import { OneClickFixPanel } from './OneClickFixPanel';
 
 const OUTCOME_LABEL: Record<StepOutcome, string> = { done: 'Fixed it', failed: "Didn't work", skipped: 'Skipped' };
 const OUTCOME_ICON = { done: MdCheck, failed: MdClose, skipped: MdRedo } as const;
@@ -70,11 +71,12 @@ interface StepsProps {
   path: string[];
   log: DiagnosticLogEntry[];
   onOutcome: (outcome: StepOutcome) => void;
+  onFixApplied: (stepId: string, referenceId: string) => void;
   finished: boolean;
 }
 
 /** Interactive step cards with "That didn't work" branching. */
-const Steps = ({ tree, path, log, onOutcome, finished }: StepsProps) => {
+const Steps = ({ tree, path, log, onOutcome, onFixApplied, finished }: StepsProps) => {
   const currentRef = useRef<HTMLHeadingElement>(null);
   const currentIndex = log.length;
 
@@ -125,6 +127,13 @@ const Steps = ({ tree, path, log, onOutcome, finished }: StepsProps) => {
               {step.title}
             </h4>
             <p className="mt-1 body-small text-gray-800">{step.body}</p>
+            {step.fix && (
+              <OneClickFixPanel
+                fix={step.fix}
+                gameId={tree.gameId}
+                onApplied={(referenceId) => onFixApplied(step.id, referenceId)}
+              />
+            )}
             <div className="mt-3 flex flex-wrap gap-2">
               <Button
                 buttonStyle="btn-secondary-solid"
@@ -165,6 +174,7 @@ export const DiagnosticCard = ({ treeId }: { treeId: string }) => {
   const [answers, setAnswers] = useState<Record<string, string> | null>(null);
   const [log, setLog] = useState<DiagnosticLogEntry[]>([]);
   const [finished, setFinished] = useState(false);
+  const [fixReferences, setFixReferences] = useState<Record<string, string>>({});
   if (!tree) return null;
 
   const path = answers ? tree.selectPath(answers) : [];
@@ -173,7 +183,8 @@ export const DiagnosticCard = ({ treeId }: { treeId: string }) => {
     const stepId = path[log.length];
     const step = stepId ? tree.steps[stepId] : undefined;
     if (!step || !answers) return;
-    const nextLog = [...log, { stepId: step.id, title: step.title, outcome }];
+    const reference = fixReferences[step.id];
+    const nextLog = [...log, { stepId: step.id, title: step.title, outcome, ...(reference ? { reference } : {}) }];
     setLog(nextLog);
     const isLast = nextLog.length === path.length;
     if (outcome === 'done' || isLast) {
@@ -199,7 +210,14 @@ export const DiagnosticCard = ({ treeId }: { treeId: string }) => {
       <p className="eyebrow-default text-sky-900">Guided troubleshooting · {tree.platform}</p>
       <h3 className="mb-3 electronicArtsTextBold text-base text-gray-900">{tree.title}</h3>
       {answers ? (
-        <Steps tree={tree} path={path} log={log} onOutcome={handleOutcome} finished={finished} />
+        <Steps
+          tree={tree}
+          path={path}
+          log={log}
+          onOutcome={handleOutcome}
+          onFixApplied={(stepId, referenceId) => setFixReferences((current) => ({ ...current, [stepId]: referenceId }))}
+          finished={finished}
+        />
       ) : (
         <Questions tree={tree} onComplete={setAnswers} />
       )}

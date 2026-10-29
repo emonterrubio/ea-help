@@ -28,25 +28,34 @@ export const AUTONOMY_LEVELS: Record<AutonomyLevel, AutonomyLevelInfo> = {
   },
 };
 
-/** Tool names the agent can use, mapped to their autonomy level. */
+/**
+ * Tools the live agent can call (api/agent.ts declares their schemas), mapped to their
+ * autonomy level. L2 tools only ever return a proposal card; the change itself runs in the
+ * browser after the player taps confirm.
+ */
 export const TOOL_LEVELS = {
   search_help_articles: 'L0',
-  get_player_context: 'L0',
-  list_purchases: 'L0',
-  check_entitlement: 'L0',
   get_known_issues: 'L0',
-  get_case_status: 'L0',
-  suggest_diagnostic_steps: 'L1',
-  restore_entitlement: 'L2',
-  refresh_entitlements: 'L2',
-  reset_cloud_save: 'L2',
+  list_purchases: 'L0',
+  start_guided_diagnostics: 'L1',
+  propose_restore: 'L2',
+  propose_license_refresh: 'L2',
+  start_account_recovery: 'L2',
   draft_case: 'L3',
-  handoff_to_advisor: 'L3',
+  hand_off_to_advisor: 'L3',
 } as const satisfies Record<string, AutonomyLevel>;
 
 export type ToolName = keyof typeof TOOL_LEVELS;
 
+export const isToolName = (name: string): name is ToolName => Object.hasOwn(TOOL_LEVELS, name);
+
 export const levelForTool = (tool: ToolName): AutonomyLevel => TOOL_LEVELS[tool];
+
+const LEVEL_ORDER: readonly AutonomyLevel[] = ['L0', 'L1', 'L2', 'L3'];
+
+/** The higher of two levels (a reply is labelled with the highest level it reached). */
+export const maxLevel = (a: AutonomyLevel, b: AutonomyLevel): AutonomyLevel =>
+  LEVEL_ORDER.indexOf(a) >= LEVEL_ORDER.indexOf(b) ? a : b;
 
 /** L2 tools never run from the model: they produce a proposal the player confirms. */
 export const requiresPlayerConfirmation = (tool: ToolName): boolean => levelForTool(tool) === 'L2';

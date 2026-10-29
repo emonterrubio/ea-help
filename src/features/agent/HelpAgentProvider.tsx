@@ -1,15 +1,17 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from 'react';
 import { useSearchParams } from 'react-router';
+import type { ProposedAction } from '@/agent/actions/types';
 import { demoEngine } from '@/agent/demo/demoEngine';
+import { LiveUnavailableError } from '@/agent/live/transport';
 import { findScenario, isScenarioId, type ScenarioId } from '@/agent/demo/scenarios';
 import type { DiagnosticResult } from '@/agent/diagnostics/types';
-import type { AgentContext, AgentInput } from '@/agent/protocol';
+import type { AgentContext, AgentInput, AgentMode, AgentRequest, ImageAttachment } from '@/agent/protocol';
 import type { CaseDraftInput } from '@/services/ea-api/types';
+import { engineFor, resolveAgentMode } from './agentEngine';
 import { HelpAgentContext, introMessage, loadAgentContext, type HelpAgentApi } from './agentContext';
 import { conversationReducer, initialConversationState, playerHistory } from './conversation';
 
 const SCENARIO_QUERY_PARAM = 'scenario';
-const engine = demoEngine;
 
 let idCounter = 0;
 const nextLocalId = (prefix: string): string => `${prefix}-${(idCounter += 1)}`;
@@ -25,6 +27,13 @@ export const HelpAgentProvider = ({ enabled, children }: HelpAgentProviderProps)
   const [state, dispatch] = useReducer(conversationReducer, initialConversationState);
   const [context, setContext] = useState<AgentContext | null>(null);
   const [prefill, setPrefill] = useState('');
+  const [mode, setMode] = useState<AgentMode>('demo');
+  // Read by `run` without re-creating every callback when the mode changes.
+  const modeRef = useRef<AgentMode>('demo');
+  const switchMode = useCallback((next: AgentMode) => {
+    modeRef.current = next;
+    setMode(next);
+  }, []);
   const contextPromise = useRef<Promise<AgentContext> | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const diagnosticsRef = useRef<DiagnosticResult[]>([]);
@@ -33,14 +42,15 @@ export const HelpAgentProvider = ({ enabled, children }: HelpAgentProviderProps)
     itemsRef.current = state.items;
   }, [state.items]);
 
-  /** Loads account context once and greets the player before the first reply. */
+  /** Loads account context (and picks live or demo) once, then greets the player before the first reply. */
   const ensureContext = useCallback((): Promise<AgentContext> => {
     if (!contextPromise.current) {
       dispatch({
         type: 'agent_event',
         event: { type: 'status', id: nextLocalId('ctx'), text: 'Loading your games and account…' },
       });
-      contextPromise.current = loadAgentContext().then((loaded) => {
+      contextPromise.current = Promise.all([loadAgentContext(), resolveAgentMode()]).then(([loaded, resolved]) => {
+        switchMode(resolved);
         setContext(loaded);
         dispatch({
           type: 'agent_event',
@@ -50,7 +60,7 @@ export const HelpAgentProvider = ({ enabled, children }: HelpAgentProviderProps)
       });
     }
     return contextPromise.current;
-  }, []);
+  }, [switchMode]);
 
   const run = useCallback(
     async (input: AgentInput, playerText?: string) => {
@@ -63,15 +73,37 @@ export const HelpAgentProvider = ({ enabled, children }: HelpAgentProviderProps)
       dispatch({ type: 'run_started' });
       try {
         const loaded = await ensureContext();
-        const request = {
-          conversationId: 'demo-conversation',
+        const request: AgentRequest = {
+          conversationId: 'help-agent-conversation',
           input,
           context: loaded,
           history,
           diagnostics,
         };
-        for await (const event of engine.run(request, controller.signal)) {
-          dispatch({ type: 'agent_event', event });
+        // Both engines run confirmed L2 actions here in the browser, never through the model.
+        try {
+          for await (const event of engineFor(modeRef.current).run(request, controller.signal)) {
+            dispatch({ type: 'agent_event', event });
+          }
+        } catch (error) {
+          if (!(error instanceof LiveUnavailableError)) throw error;
+          // Over a limit, key missing or upstream down: continue in demo mode for the session.
+          switchMode('demo');
+          if (error.partial) {
+            dispatch({
+              type: 'agent_event',
+              event: {
+                type: 'error',
+                id: nextLocalId('err'),
+                message:
+                  'The live agent stopped responding, so I switched to demo mode. Try again, or talk to a person.',
+              },
+            });
+          } else {
+            for await (const event of demoEngine.run(request, controller.signal)) {
+              dispatch({ type: 'agent_event', event });
+            }
+          }
         }
       } catch (error) {
         if (!controller.signal.aborted) {
@@ -89,7 +121,7 @@ export const HelpAgentProvider = ({ enabled, children }: HelpAgentProviderProps)
         if (abortRef.current === controller) dispatch({ type: 'run_finished' });
       }
     },
-    [ensureContext],
+    [ensureContext, switchMode],
   );
 
   const open = useCallback(
@@ -114,11 +146,11 @@ export const HelpAgentProvider = ({ enabled, children }: HelpAgentProviderProps)
   }, []);
 
   const send = useCallback(
-    (text: string) => {
+    (text: string, image?: ImageAttachment) => {
       const trimmed = text.trim();
       if (!trimmed) return;
-      dispatch({ type: 'user_message', id: nextLocalId('user'), text: trimmed });
-      void run({ kind: 'text', text: trimmed }, trimmed);
+      dispatch({ type: 'user_message', id: nextLocalId('user'), text: trimmed, attachment: image?.name });
+      void run({ kind: 'text', text: trimmed, ...(image ? { image } : {}) }, trimmed);
     },
     [run],
   );
@@ -143,6 +175,23 @@ export const HelpAgentProvider = ({ enabled, children }: HelpAgentProviderProps)
       const text = 'Send my case to an advisor.';
       dispatch({ type: 'user_message', id: nextLocalId('user'), text });
       void run({ kind: 'submit_case', draft }, text);
+    },
+    [run],
+  );
+
+  const confirmAction = useCallback(
+    (action: ProposedAction, label: string) => {
+      dispatch({ type: 'user_message', id: nextLocalId('user'), text: label });
+      void run({ kind: 'confirm_action', action }, label);
+    },
+    [run],
+  );
+
+  const reportIdentityVerified = useCallback(
+    (sessionId: string) => {
+      const text = "I've finished the identity checks.";
+      dispatch({ type: 'user_message', id: nextLocalId('user'), text });
+      void run({ kind: 'identity_verified', sessionId }, text);
     },
     [run],
   );
@@ -175,7 +224,7 @@ export const HelpAgentProvider = ({ enabled, children }: HelpAgentProviderProps)
   const api = useMemo<HelpAgentApi>(
     () => ({
       state,
-      mode: engine.mode,
+      mode,
       context,
       open,
       close,
@@ -183,9 +232,24 @@ export const HelpAgentProvider = ({ enabled, children }: HelpAgentProviderProps)
       talkToPerson,
       reportDiagnostic,
       submitCase,
+      confirmAction,
+      reportIdentityVerified,
       prefill,
     }),
-    [state, context, open, close, send, talkToPerson, reportDiagnostic, submitCase, prefill],
+    [
+      state,
+      mode,
+      context,
+      open,
+      close,
+      send,
+      talkToPerson,
+      reportDiagnostic,
+      submitCase,
+      confirmAction,
+      reportIdentityVerified,
+      prefill,
+    ],
   );
 
   return <HelpAgentContext.Provider value={api}>{children}</HelpAgentContext.Provider>;

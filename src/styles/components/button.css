@@ -1,8 +1,8 @@
 @layer components {
   .btn {
     letter-spacing: 0.025rem;
-    font-family: ElectronicArtsTextBold;
-    font-weight: normal;
+    font-family: var(--font-family-sans);
+    font-weight: 700;
     align-items: center;
     text-align: center;
     display: inline;

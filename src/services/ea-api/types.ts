@@ -58,7 +58,7 @@ export interface Incident {
 }
 
 /** Where a case interaction happened; all channels share one timeline (Living Cases). */
-export type TimelineChannel = 'web' | 'ai' | 'chat' | 'email' | 'system';
+export type TimelineChannel = 'web' | 'ai' | 'chat' | 'email' | 'system' | 'receipt';
 
 export interface TimelineEntry {
   id: string;
@@ -90,4 +90,47 @@ export interface CaseDraftInput {
   sentiment: Sentiment;
   transcript: string[];
   advisorName: string;
+}
+
+/** Account changes the agent may apply, always after a player tap (L2). */
+export type ActionKind = 'restore_entitlement' | 'refresh_entitlements' | 'reset_cloud_save' | 'reset_credentials';
+
+/** Every L2 change leaves a receipt with a reference ID (and undo where it can be reversed). */
+export interface ActionReceipt {
+  referenceId: string;
+  kind: ActionKind;
+  /** What the change applied to: a purchase, game or recovery session id. */
+  subject: string;
+  title: string;
+  /** ISO 8601 timestamp. */
+  appliedAt: string;
+  undoable: boolean;
+  undoneAt?: string;
+  /** The My Cases entry that records this change, if one was created. */
+  caseId?: string;
+}
+
+/** Identity checks the player can pass during account recovery. */
+export type IdentityFactor = 'email_code' | 'purchase_history';
+
+/** A sign-in attempt being recovered, with the signals that cap the agent's autonomy. */
+export interface RecoverySession {
+  id: string;
+  device: string;
+  location: string;
+  /** ISO 8601 timestamp. */
+  attemptedAt: string;
+  newDevice: boolean;
+  regionChanged: boolean;
+  /** Account email changed within the last 14 days. */
+  recentEmailChange: boolean;
+}
+
+export interface SignInRecord {
+  id: string;
+  device: string;
+  location: string;
+  /** ISO 8601 timestamp. */
+  at: string;
+  recognized: boolean;
 }

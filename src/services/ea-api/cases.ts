@@ -7,7 +7,7 @@ import type { SupportCase } from '@/types/domain';
 import { demoPlayer } from './fixtures';
 import { simulateLatency } from './latency';
 import { getDemoState, updateDemoState, type DemoState } from './store';
-import type { CaseDraftInput, PlainStatus, TimelineEntry } from './types';
+import type { ActionReceipt, CaseDraftInput, PlainStatus, TimelineEntry } from './types';
 
 /** A case the Help Agent drafted and the player sent. Shown alongside v1 cases. */
 export interface AgentCase extends SupportCase {
@@ -15,6 +15,8 @@ export interface AgentCase extends SupportCase {
   createdAt: string;
   timeline: TimelineEntry[];
   plainStatus: PlainStatus;
+  /** Set when the case records an applied change (a receipt). */
+  receiptReferenceId?: string;
 }
 
 export type AnyCase = SupportCase | AgentCase;
@@ -99,6 +101,92 @@ export const createAgentCase = async (draft: CaseDraftInput, now = new Date()): 
   updateDemoState((state) => ({ ...state, createdCases: [agentCase, ...state.createdCases] }));
   return agentCase;
 };
+
+/** What a receipt's My Cases entry says about the change. */
+export interface ReceiptCaseDetails {
+  gameId: string | null;
+  summary: string;
+  /** Evidence the agent checked before proposing the change. */
+  details: string[];
+  /** Plain-language result, e.g. "Restored to your account." */
+  outcome: string;
+}
+
+/** A closed case that records a change the agent applied after the player confirmed (L2). */
+export const buildReceiptCase = (receipt: ActionReceipt, details: ReceiptCaseDetails, now: Date): AgentCase => {
+  const game = games.find((item) => item.id === details.gameId);
+  const at = `${shortDate(now)} at ${shortTime(now)}`;
+  return {
+    origin: 'agent',
+    id: `ai-${receipt.referenceId.toLowerCase()}`,
+    img: game?.logo ?? eaLogo,
+    game: game?.title ?? 'EA account',
+    platform: demoPlayer.platform,
+    case: caseNumberFrom(now),
+    status: 'closed',
+    type: 'active',
+    outcome: 'resolved by the Help Agent',
+    date: shortDate(now),
+    dateUpdate: shortDate(now),
+    time: shortTime(now),
+    title: receipt.title,
+    chipStyle: 'chip-blue',
+    description: details.summary,
+    conversation: '',
+    createdAt: now.toISOString(),
+    receiptReferenceId: receipt.referenceId,
+    timeline: [
+      {
+        id: 'ai-checks',
+        channel: 'ai',
+        author: 'EA Help Agent (AI)',
+        at,
+        title: 'Checked and proposed by the Help Agent',
+        body: details.summary,
+        details: details.details,
+      },
+      { id: 'player-confirmed', channel: 'web', author: 'You', at, title: 'You confirmed the change' },
+      {
+        id: 'receipt',
+        channel: 'receipt',
+        author: 'EA Help',
+        at,
+        title: receipt.title,
+        body: `Reference ID ${receipt.referenceId}.${receipt.undoable ? ' You can undo this from this page.' : ''}`,
+      },
+    ],
+    plainStatus: {
+      now: `Done. ${details.outcome}`,
+      next: receipt.undoable
+        ? "There's nothing else you need to do. If this was a mistake, you can undo it here."
+        : "There's nothing else you need to do.",
+      eta: `Completed ${shortDate(now)}`,
+    },
+  };
+};
+
+/** Notes an undo on a receipt's case. */
+export const withUndoRecorded = (agentCase: AgentCase, now: Date): AgentCase => ({
+  ...agentCase,
+  dateUpdate: shortDate(now),
+  time: shortTime(now),
+  timeline: [
+    ...agentCase.timeline,
+    {
+      id: 'undone',
+      channel: 'receipt',
+      author: 'You',
+      at: `${shortDate(now)} at ${shortTime(now)}`,
+      title: 'Change undone',
+      body: `Reference ID ${agentCase.receiptReferenceId ?? ''} was reversed.`,
+    },
+  ],
+  plainStatus: {
+    now: 'Undone. The change was reversed.',
+    next: 'Ask the Help Agent any time if you want it applied again.',
+    eta: `Undone ${shortDate(now)}`,
+  },
+});
 
 /** Agent-created cases (newest first) followed by the v1 cases. */
 export const selectAllCases = (state: DemoState): AnyCase[] => [...state.createdCases, ...cases];

@@ -23,4 +23,9 @@ export default tseslint.config(
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
     },
   },
+  {
+    // Server functions, their tests and the live eval run on Node.
+    files: ['api/**/*.ts', 'tests/**/*.ts', 'evals/**/*.ts'],
+    languageOptions: { globals: globals.node },
+  },
 );

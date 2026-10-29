@@ -1,4 +1,4 @@
-import type { CaseDraftInput, Sentiment } from '@/services/ea-api/types';
+import type { CaseDraftInput, RecoverySession, Sentiment } from '@/services/ea-api/types';
 import type { DiagnosticResult } from './diagnostics/types';
 import type { AgentContext } from './protocol';
 
@@ -18,7 +18,12 @@ export const detectSentiment = (texts: readonly string[]): Sentiment => {
 const OUTCOME_LABELS = { done: 'fixed it', skipped: 'skipped', failed: "didn't work" } as const;
 
 export const describeSteps = (diagnostics: readonly DiagnosticResult[]): string[] =>
-  diagnostics.flatMap((result) => result.log.map((entry) => `${entry.title}: ${OUTCOME_LABELS[entry.outcome]}`));
+  diagnostics.flatMap((result) =>
+    result.log.map(
+      (entry) =>
+        `${entry.title}: ${OUTCOME_LABELS[entry.outcome]}${entry.reference ? ` (one-click fix applied, ref ${entry.reference})` : ''}`,
+    ),
+  );
 
 const gameMentioned = (texts: readonly string[], context: AgentContext): string | null => {
   const joined = texts.join(' ').toLowerCase();
@@ -78,3 +83,52 @@ export const advisorGreeting = (draft: CaseDraftInput, context: AgentContext): s
       : `and everything you told the Help Agent`;
   return `Hi ${firstName}, I'm ${draft.advisorName}. I've read your case ${tried}, so we'll pick up from there.`;
 };
+
+interface ReviewCaseInput {
+  title: string;
+  /** What the agent verified and why a person has to finish it. */
+  finding: string;
+  gameId: string | null;
+  evidence: string[];
+  history: readonly string[];
+  context: AgentContext;
+}
+
+/** Drafts a case the rules engine routed to a person, with the agent's evidence attached. */
+export const draftReviewCase = ({
+  title,
+  finding,
+  gameId,
+  evidence,
+  history,
+  context,
+}: ReviewCaseInput): CaseDraftInput => ({
+  title,
+  summary: [history[0] ? `${context.playerName} reported: "${history[0]}".` : '', finding].filter(Boolean).join(' '),
+  gameId,
+  evidence: [`Platform: ${context.platform} (${context.region})`, ...evidence],
+  stepsTried: [],
+  sentiment: detectSentiment(history),
+  transcript: [...history],
+  advisorName: ADVISOR_NAME,
+});
+
+/** High-risk recovery: the case an advisor picks up. Records that nothing on the account changed. */
+export const takeoverCaseDraft = (
+  session: RecoverySession,
+  reasons: readonly string[],
+  history: readonly string[],
+  context: AgentContext,
+): CaseDraftInput =>
+  draftReviewCase({
+    title: 'Possible account takeover',
+    finding: 'Risk signals blocked self-service recovery. No account changes were applied.',
+    gameId: null,
+    evidence: [
+      `Sign-in attempt: ${session.device}, ${session.location}`,
+      ...reasons.map((reason) => `Risk signal: ${reason}`),
+      'Account changes applied by the Help Agent: none',
+    ],
+    history,
+    context,
+  });

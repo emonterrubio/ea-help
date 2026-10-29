@@ -15,10 +15,11 @@ import { Chip } from '@/components/ui/Chip';
 import { Divider } from '@/components/ui/Divider';
 import { CaseTimeline } from '@/features/cases/CaseTimeline';
 import { PlainStatusPanel } from '@/features/cases/PlainStatusPanel';
+import { ReceiptUndoPanel } from '@/features/cases/ReceiptUndoPanel';
 import { useCase } from '@/features/cases/useCases';
 import { useAiLayer } from '@/features/flags/aiLayer';
 import { usePlaceholderAction } from '@/hooks/usePlaceholderAction';
-import { plainStatusFor, timelineForCase } from '@/services/ea-api/cases';
+import { isAgentCase, plainStatusFor, timelineForCase } from '@/services/ea-api/cases';
 import { useScrollToTop } from '@/hooks/useScrollToTop';
 import { capitalizeEachWord, capitalizeFirstLetter } from '@/lib/text';
 import type { SupportCase } from '@/types/domain';
@@ -171,7 +172,9 @@ export const CaseDetailsPage = () => {
 
   const isActive = supportCase.type === 'active';
   const isLive = isActive && supportCase.status === 'open';
-  const isResumable = isActive && supportCase.status === 'closed';
+  const receiptReferenceId = isAgentCase(supportCase) ? supportCase.receiptReferenceId : undefined;
+  // Receipts record a finished change; there is nothing to resume.
+  const isResumable = isActive && supportCase.status === 'closed' && !receiptReferenceId;
 
   return (
     <div className="-mt-20">
@@ -191,6 +194,7 @@ export const CaseDetailsPage = () => {
         <p className="body-default">{supportCase.description}</p>
       </div>
       {aiEnabled && <PlainStatusPanel status={plainStatusFor(supportCase)} />}
+      {aiEnabled && receiptReferenceId && <ReceiptUndoPanel referenceId={receiptReferenceId} />}
       {aiEnabled ? (
         isLive ? (
           <LiveConversation timeline={<CaseTimeline entries={timelineForCase(supportCase)} />} />

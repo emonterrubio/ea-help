@@ -45,6 +45,30 @@ const bf2042Ps5Crash: DiagnosticTree = {
       title: 'Check your connection',
       body: 'Go to Settings > Network > Connection Status > Test Internet Connection. If NAT Type shows Type 3, use a wired connection or enable UPnP on your router.',
     },
+    licenses: {
+      id: 'licenses',
+      title: 'Refresh your game licenses',
+      body: 'Battlefield 2042 checks your licenses when it starts. A stale license on your PS5 can close the game without an error. I can refresh them from here.',
+      fix: {
+        kind: 'refresh_entitlements',
+        label: 'Refresh my licenses',
+        changes: ['Re-sync your Battlefield 2042 licenses with your PS5', 'Nothing is removed or charged'],
+      },
+    },
+    cloudsettings: {
+      id: 'cloudsettings',
+      title: 'Reset your cloud settings cache',
+      body: 'A damaged settings file synced from the cloud can crash the game while a multiplayer match loads. I can reset the cached settings from here.',
+      fix: {
+        kind: 'reset_cloud_save',
+        label: 'Reset cloud settings',
+        changes: [
+          'Clear the Battlefield 2042 settings cached in the cloud',
+          'Your controls and graphics settings go back to defaults',
+          'Your progress, unlocks and purchases stay as they are',
+        ],
+      },
+    },
     reinstall: {
       id: 'reinstall',
       title: 'Reinstall the game',
@@ -53,10 +77,10 @@ const bf2042Ps5Crash: DiagnosticTree = {
   },
   selectPath: (answers) =>
     answers.when === 'multiplayer'
-      ? ['update', 'network', 'rebuild', 'reinstall']
+      ? ['update', 'network', 'cloudsettings', 'rebuild', 'reinstall']
       : answers.when === 'launch'
-        ? ['update', 'storage', 'rebuild', 'reinstall']
-        : ['update', 'rebuild', 'storage', 'reinstall'],
+        ? ['update', 'storage', 'licenses', 'rebuild', 'reinstall']
+        : ['update', 'rebuild', 'cloudsettings', 'storage', 'reinstall'],
 };
 
 const fifa23Connection: DiagnosticTree = {

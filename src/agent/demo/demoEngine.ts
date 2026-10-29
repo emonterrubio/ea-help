@@ -1,42 +1,38 @@
-import { listIncidents } from '@/services/ea-api/api';
-import { createAgentCase } from '@/services/ea-api/cases';
+import {
+  entitlementStatusFor,
+  getEntitlementStatus,
+  getPlayerProfile,
+  listGrants,
+  listIncidents,
+  listPurchases,
+} from '@/services/ea-api/api';
 import { INCIDENT_STATUS_LABELS, incidentExpectation } from '@/services/ea-api/incidentStatus';
-import type { CaseDraftInput, Incident } from '@/services/ea-api/types';
-import { advisorGreeting, detectSentiment, draftCase } from '../casework';
+import {
+  DEMO_RECOVERY_SESSIONS,
+  FACTOR_LABELS,
+  getRecoverySession,
+  verifiedFactorsFor,
+} from '@/services/ea-api/security';
+import type { Incident, Purchase, RecoverySession } from '@/services/ea-api/types';
+import { runConfirmedAction } from '../actions/confirm';
+import { detectSentiment, draftCase, draftReviewCase, takeoverCaseDraft } from '../casework';
 import { treeFor } from '../diagnostics/trees';
+import { handOff } from '../handoff';
 import type { DiagnosticResult } from '../diagnostics/types';
 import { answerFor, tokenize } from '../knowledge/search';
-import { AUTONOMY_LEVELS } from '../policy/autonomy';
+import { evaluateRestoreEligibility } from '../policy/eligibility';
+import { policyCitation } from '../policy/policies';
+import { assessRecoveryRisk, MIN_VERIFIED_FACTORS } from '../policy/risk';
+import { nextEventId, pause, statusEvent } from '../pacing';
+import { formatDate, formatUsd, licenseRefreshPreview, restorePreview } from '../previews';
 import type { AgentContext, AgentEngine, AgentEvent, AgentRequest } from '../protocol';
 import { routeIntent } from './router';
-import { findScenario, type Scenario } from './scenarios';
+import { findScenario } from './scenarios';
 
-let pacingMs = 600;
+export { setDemoPacing } from '../pacing';
 
-/** Delay between scripted events so status lines read as progress. Tests set 0. */
-export const setDemoPacing = (ms: number): void => {
-  pacingMs = ms;
-};
-
-const pause = (signal: AbortSignal): Promise<void> =>
-  new Promise((resolve, reject) => {
-    if (signal.aborted) return reject(signal.reason);
-    if (pacingMs === 0) return resolve();
-    const timer = setTimeout(resolve, pacingMs);
-    signal.addEventListener(
-      'abort',
-      () => {
-        clearTimeout(timer);
-        reject(signal.reason);
-      },
-      { once: true },
-    );
-  });
-
-let eventCounter = 0;
-const nextId = (): string => `evt-${(eventCounter += 1)}`;
-
-const status = (text: string): AgentEvent => ({ type: 'status', id: nextId(), text });
+const nextId = nextEventId;
+const status = statusEvent;
 
 const ownedTitles = (context: AgentContext): string[] => context.ownedGames.map((game) => game.title);
 
@@ -109,41 +105,17 @@ async function* knownIssue(text: string, context: AgentContext, signal: AbortSig
   } satisfies AgentEvent;
 }
 
-/** Flows that arrive in a later build phase describe what they will do. */
-const scenarioPreview = (scenario: Scenario): AgentEvent => {
-  const level = AUTONOMY_LEVELS[scenario.level];
-  return {
-    type: 'message',
-    id: nextId(),
-    level: scenario.level,
-    text: `This looks like a "${scenario.title}" issue. In this prototype build the full flow arrives in Phase ${scenario.phase}. Here's what it will do: ${scenario.outcome} Highest autonomy used: ${level.level} ${level.name} (${level.playerSees.toLowerCase()}).`,
-  };
+/** The owned game the player named, matched on title words (not numbers like "23"). */
+const mentionedGame = (text: string, context: AgentContext) => {
+  const mentioned = new Set(tokenize(text));
+  return context.ownedGames.find((owned) =>
+    tokenize(owned.title).some((token) => !/^\d+$/.test(token) && mentioned.has(token)),
+  );
 };
-
-/** Creates the case and hands it to a person, who starts from the agent's summary (L3). */
-async function* handOff(draft: CaseDraftInput, context: AgentContext, signal: AbortSignal) {
-  yield status('Creating your case…');
-  await pause(signal);
-  const created = await createAgentCase(draft);
-  yield status('Connecting you with an advisor…');
-  await pause(signal);
-  yield {
-    type: 'handoff',
-    id: nextId(),
-    advisorName: draft.advisorName,
-    summary: draft.summary,
-    caseId: created.id,
-    caseNumber: created.case,
-    greeting: advisorGreeting(draft, context),
-  } satisfies AgentEvent;
-}
 
 /** L1: guided diagnostics from an authored decision tree for the player's game and platform. */
 async function* guidedDiagnostics(text: string, context: AgentContext, signal: AbortSignal) {
-  const mentioned = new Set(tokenize(text));
-  const game = context.ownedGames.find((owned) =>
-    tokenize(owned.title).some((token) => !/^\d+$/.test(token) && mentioned.has(token)),
-  );
+  const game = mentionedGame(text, context);
   const tree = game ? treeFor(game.id, context.platform) : undefined;
   if (!game || !tree) {
     yield {
@@ -196,6 +168,198 @@ async function* diagnosticOutcome(result: DiagnosticResult, request: AgentReques
   } satisfies AgentEvent;
 }
 
+/** Newest undelivered, unrefunded purchase first; otherwise the newest purchase. */
+const purchaseInQuestion = (purchases: Purchase[], grants: Awaited<ReturnType<typeof listGrants>>) => {
+  const newestFirst = [...purchases].sort((a, b) => b.purchasedAt.localeCompare(a.purchasedAt));
+  return (
+    newestFirst.find(
+      (purchase) => entitlementStatusFor(purchase, grants) === 'missing' && purchase.refundStatus === 'none',
+    ) ?? newestFirst[0]
+  );
+};
+
+/**
+ * Instant Content Recovery. The agent verifies the purchase and the entitlement (L0);
+ * the rules engine decides between an instant restore (L2), a license refresh, or review (L3).
+ */
+async function* contentRecovery(text: string, request: AgentRequest, signal: AbortSignal) {
+  const { context } = request;
+  const game = mentionedGame(text, context);
+  yield status(game ? `Checking your ${game.title} purchases…` : 'Checking your recent purchases…');
+  await pause(signal);
+  const [purchases, grants] = await Promise.all([listPurchases(game?.id), listGrants()]);
+  const purchase = purchaseInQuestion(purchases, grants);
+  if (!purchase) {
+    yield {
+      type: 'message',
+      id: nextId(),
+      level: 'L0',
+      text: `I don't see a${game ? ` ${game.title}` : ''} purchase on your EA account, so I won't guess. If you bought it from another store, tap "Talk to a person" and an advisor can look it up.`,
+    } satisfies AgentEvent;
+    return;
+  }
+  const gameTitle = context.ownedGames.find((owned) => owned.id === purchase.gameId)?.title ?? 'your game';
+  yield status(`Checking whether it reached your account…`);
+  await pause(signal);
+  const entitlement = await getEntitlementStatus(purchase.id);
+  const decision = evaluateRestoreEligibility({
+    purchase,
+    entitlementGranted: entitlement === 'granted',
+    grants,
+    now: new Date(),
+  });
+  const order = `order ${purchase.orderNumber}, ${formatUsd(purchase.amountUsd)}`;
+  const purchaseCitation = {
+    kind: 'purchase' as const,
+    purchaseId: purchase.id,
+    label: `Order ${purchase.orderNumber}`,
+  };
+
+  switch (decision.outcome) {
+    case 'eligible':
+      yield {
+        type: 'message',
+        id: nextId(),
+        level: 'L2',
+        text: `Found it. You bought ${purchase.itemName} on ${formatDate(purchase.purchasedAt)} (${order}), but it never reached your account. It qualifies for an instant restore. Here's exactly what will change. Nothing happens until you confirm.`,
+        citations: [purchaseCitation, policyCitation('instant-restore')],
+      } satisfies AgentEvent;
+      yield {
+        type: 'card',
+        id: nextId(),
+        level: 'L2',
+        card: restorePreview(purchase, gameTitle),
+      } satisfies AgentEvent;
+      return;
+    case 'not_needed':
+      yield {
+        type: 'message',
+        id: nextId(),
+        level: 'L1',
+        text: `${purchase.itemName} (${order}) is already on your account. If it isn't showing in ${gameTitle}, refreshing your licenses usually brings it back. I can do that for you.`,
+        citations: [purchaseCitation],
+      } satisfies AgentEvent;
+      yield {
+        type: 'card',
+        id: nextId(),
+        level: 'L2',
+        card: licenseRefreshPreview(purchase.gameId, gameTitle, purchase.platform),
+      } satisfies AgentEvent;
+      return;
+    case 'review': {
+      yield {
+        type: 'message',
+        id: nextId(),
+        level: 'L3',
+        text: `I found your purchase of ${purchase.itemName} (${order}), and it never reached your account. I can't restore this one myself: ${decision.reasons.join(' ')} I drafted a case with the order details attached, so an advisor can fix it without asking you for screenshots or receipts.`,
+        citations: [purchaseCitation, policyCitation('instant-restore')],
+      } satisfies AgentEvent;
+      const draft = draftReviewCase({
+        title: `Missing purchase: ${purchase.itemName}`,
+        finding: `Purchase verified (order ${purchase.orderNumber}) but never delivered. Automatic restore isn't allowed, so it needs an advisor.`,
+        gameId: purchase.gameId,
+        evidence: [
+          `Item: ${purchase.itemName}`,
+          `Order ${purchase.orderNumber}: ${formatUsd(purchase.amountUsd)} on ${formatDate(purchase.purchasedAt)}`,
+          'Delivered at purchase: no',
+          ...decision.reasons.map((reason) => `Review reason: ${reason}`),
+        ],
+        history: request.history,
+        context,
+      });
+      yield {
+        type: 'card',
+        id: nextId(),
+        level: 'L3',
+        card: { type: 'case_draft', draftId: nextId(), draft },
+      } satisfies AgentEvent;
+      return;
+    }
+  }
+}
+
+/** High risk caps autonomy at L3: no change is applied, and a person takes over. */
+async function* securityHandoff(
+  session: RecoverySession,
+  reasons: string[],
+  request: AgentRequest,
+  signal: AbortSignal,
+) {
+  yield {
+    type: 'message',
+    id: nextId(),
+    level: 'L3',
+    text: `I'm treating this as a possible account takeover, so I won't change anything from this chat, and nothing on your account has been changed. Here's what I found: ${reasons.join('; ')}. I'm passing this to an advisor now with everything I checked.`,
+    citations: [policyCitation('account-recovery')],
+  } satisfies AgentEvent;
+  yield* handOff(takeoverCaseDraft(session, reasons, request.history, request.context), request.context, signal);
+}
+
+/**
+ * Secure Account Recovery. Risk signals are checked first: any hard signal goes straight
+ * to a person. Otherwise the player passes identity checks before a reset is proposed.
+ */
+async function* accountRecovery(sessionId: string, request: AgentRequest, signal: AbortSignal) {
+  yield status('Checking your recent sign-in attempt…');
+  await pause(signal);
+  const session = await getRecoverySession(sessionId);
+  // Assume full verification: if the signals alone are high risk, identity checks can't help.
+  const signalRisk = assessRecoveryRisk({ ...session, verifiedFactors: MIN_VERIFIED_FACTORS + 1 });
+  if (signalRisk.level === 'high') {
+    yield* securityHandoff(session, signalRisk.reasons, request, signal);
+    return;
+  }
+  yield {
+    type: 'message',
+    id: nextId(),
+    level: 'L2',
+    text: `I can help you get back in. Your sign-in attempt came from your usual ${session.device} in ${session.location}, which is a good sign. First I need to confirm it's you. I'll never ask for your password. Two quick checks:`,
+    citations: [policyCitation('account-recovery')],
+  } satisfies AgentEvent;
+  yield { type: 'card', id: nextId(), level: 'L2', card: { type: 'identity_check', sessionId } } satisfies AgentEvent;
+}
+
+/** After identity checks: re-assess risk, then propose the reset (L2) or hand off (L3). */
+async function* afterVerification(sessionId: string, request: AgentRequest, signal: AbortSignal) {
+  yield status('Checking your identity checks and risk signals…');
+  await pause(signal);
+  const [session, player] = await Promise.all([getRecoverySession(sessionId), getPlayerProfile()]);
+  const factors = verifiedFactorsFor(sessionId);
+  const risk = assessRecoveryRisk({ ...session, verifiedFactors: factors.length });
+  if (risk.level === 'high') {
+    yield* securityHandoff(session, risk.reasons, request, signal);
+    return;
+  }
+  yield {
+    type: 'message',
+    id: nextId(),
+    level: 'L2',
+    text: `Thanks, that's you. Risk check: low (${factors.length} identity checks passed, usual device and region, no recent email change). Here's what I'll change. Nothing happens until you confirm.`,
+  } satisfies AgentEvent;
+  yield {
+    type: 'card',
+    id: nextId(),
+    level: 'L2',
+    card: {
+      type: 'action_preview',
+      actionId: nextId(),
+      action: { kind: 'reset_credentials', sessionId },
+      title: 'Reset your password',
+      details: [
+        { label: 'Account', value: player.maskedEmail },
+        { label: 'Sign-in attempt', value: `${session.device}, ${session.location}` },
+        { label: 'Identity checks', value: factors.map((factor) => FACTOR_LABELS[factor]).join(', ') },
+      ],
+      changes: [
+        `Email a password reset link to ${player.maskedEmail}`,
+        'Sign out every other device',
+        'Keep your games, progress and purchases as they are',
+      ],
+      confirmLabel: 'Reset password',
+    },
+  } satisfies AgentEvent;
+}
+
 async function* runDemo(request: AgentRequest, signal: AbortSignal): AsyncGenerator<AgentEvent> {
   const { input, context } = request;
 
@@ -214,6 +378,14 @@ async function* runDemo(request: AgentRequest, signal: AbortSignal): AsyncGenera
       yield* diagnosticOutcome(input.result, request, signal);
       yield { type: 'done' };
       return;
+    case 'identity_verified':
+      yield* afterVerification(input.sessionId, request, signal);
+      yield { type: 'done' };
+      return;
+    case 'confirm_action':
+      // The provider runs confirmations in the browser; delegated here for completeness.
+      yield* runConfirmedAction(request, signal);
+      return;
     case 'text':
     case 'scenario':
       break;
@@ -222,8 +394,10 @@ async function* runDemo(request: AgentRequest, signal: AbortSignal): AsyncGenera
   const scenario = input.kind === 'scenario' ? findScenario(input.scenarioId) : undefined;
   const text = input.kind === 'text' ? input.text : (scenario?.prompt ?? '');
 
+  const scenarioId = scenario?.id ?? routeIntent(text);
+
   // Safety and sentiment triggers route to a person immediately, before anything else.
-  if (detectSentiment([text]) === 'distressed' || (scenario?.id ?? routeIntent(text)) === 'escalate') {
+  if (detectSentiment([text]) === 'distressed' || scenarioId === 'escalate') {
     yield {
       type: 'message',
       id: nextId(),
@@ -238,7 +412,6 @@ async function* runDemo(request: AgentRequest, signal: AbortSignal): AsyncGenera
   yield status('Understanding your request…');
   await pause(signal);
 
-  const scenarioId = scenario?.id ?? routeIntent(text);
   switch (scenarioId) {
     case 'known-issue':
       yield* knownIssue(text, context, signal);
@@ -246,14 +419,21 @@ async function* runDemo(request: AgentRequest, signal: AbortSignal): AsyncGenera
     case 'diagnostics':
       yield* guidedDiagnostics(text, context, signal);
       break;
+    case 'content-recovery':
+    case 'content-review':
+      // The route only says "missing purchase"; the rules engine decides restore or review.
+      yield* contentRecovery(text, request, signal);
+      break;
+    case 'account-recovery':
+      yield* accountRecovery(DEMO_RECOVERY_SESSIONS.usualDevice, request, signal);
+      break;
+    case 'account-recovery-risky':
+      yield* accountRecovery(DEMO_RECOVERY_SESSIONS.newDevice, request, signal);
+      break;
     case 'quick-answer':
     case null:
       yield* answerFromHelpContent(text, context, signal);
       break;
-    default: {
-      const routed = findScenario(scenarioId);
-      if (routed) yield scenarioPreview(routed);
-    }
   }
   yield { type: 'done' };
 }

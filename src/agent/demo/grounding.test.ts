@@ -1,5 +1,6 @@
 import articles from '@/data/articles';
-import { demoIncidents } from '@/services/ea-api/fixtures';
+import { demoIncidents, demoPurchases } from '@/services/ea-api/fixtures';
+import { POLICIES } from '../policy/policies';
 import type { AgentEvent, AgentRequest } from '../protocol';
 import { demoEngine } from './demoEngine';
 import { SCENARIOS } from './scenarios';
@@ -39,7 +40,7 @@ const FREE_TEXT = [
 ];
 
 describe('grounding', () => {
-  it('cites only real articles and incidents across every scenario and free-text query', async () => {
+  it('cites only real articles, incidents, purchases and policies across every scenario and free-text query', async () => {
     const runs = await Promise.all([
       ...SCENARIOS.map((scenario) => run({ kind: 'scenario', scenarioId: scenario.id })),
       ...FREE_TEXT.map((text) => run({ kind: 'text', text })),
@@ -52,6 +53,12 @@ describe('grounding', () => {
       }
       if (citation.kind === 'incident') {
         expect(demoIncidents.some((incident) => incident.id === citation.incidentId)).toBe(true);
+      }
+      if (citation.kind === 'purchase') {
+        expect(demoPurchases.some((purchase) => purchase.id === citation.purchaseId)).toBe(true);
+      }
+      if (citation.kind === 'policy') {
+        expect(Object.keys(POLICIES)).toContain(citation.policyId);
       }
     }
   });

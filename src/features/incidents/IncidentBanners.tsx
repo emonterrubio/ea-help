@@ -1,4 +1,5 @@
 import { MdAutoAwesome } from 'react-icons/md';
+import { Button } from '@/components/ui/Button';
 import { useOptionalHelpAgent } from '@/features/agent/agentContext';
 import { useAiLayer } from '@/features/flags/aiLayer';
 import { IncidentNotice } from './IncidentNotice';
@@ -26,14 +27,17 @@ export const IncidentBanners = ({ gameIds, className = '' }: IncidentBannersProp
           headingLevel="h2"
           action={
             agent && (
-              <button
-                type="button"
-                onClick={() => agent.open({ scenarioId: 'known-issue' })}
-                className="inline-flex items-center gap-x-1.5 rounded-md px-2.5 py-1.5 electronicArtsTextBold text-xs tracking-wide text-blue-700 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
-              >
-                <MdAutoAwesome className="h-4 w-4" aria-hidden="true" />
-                Ask the Help Agent<span className="sr-only"> about this issue</span>
-              </button>
+              <span className="shrink-0 whitespace-nowrap">
+                <Button
+                  buttonStyle="btn-alert-info"
+                  buttonSize="btn-md"
+                  buttonWidth="w-auto"
+                  onClick={() => agent.open({ scenarioId: 'known-issue' })}
+                >
+                  <MdAutoAwesome className="mr-1.5 inline h-4 w-4" aria-hidden="true" />
+                  Ask the Help Agent<span className="sr-only"> about this issue</span>
+                </Button>
+              </span>
             )
           }
         />

@@ -11,6 +11,9 @@ and produce every image the case-study page needs.
   registry + router + scripted engine, Help Agent panel shell (greeting with context,
   narrated status, talk to a person / handoff), launcher, `?scenario=` deep links, `/demo`
   hub. AI-off build is pixel-identical to production v1 (32/32 route × viewport checks).
+  Since Oct 28 2026 the v1 baseline uses Inter instead of the EA typefaces (an intentional
+  design change, AI on and off), so parity runs against production fail on every text
+  glyph until that change is deployed; after the deploy, production is the baseline again.
 - **Phase 1 (read-only intelligence): done.** Grounded help-article search (`src/agent/knowledge`);
   the agent answers with a cited article or declines to guess. Known-issue flow with an
   incident card. Answer-first search (cited answer above results) and zero-result recovery
@@ -26,6 +29,32 @@ and produce every image the case-study page needs.
   (the advisor greets the player and references what was tried). Agent cases appear in My
   Cases. Case details gain plain-language status and a unified web/AI/chat/email timeline.
   Tests check that every escalation path carries the diagnostic log.
+- **Phase 3 (act with confirm): done.** Instant Content Recovery: the agent verifies the
+  purchase and entitlement, then the rules engine picks an instant restore (preview →
+  confirm → receipt with reference ID → undo, recorded in My Cases), a license refresh when
+  the item is already delivered, or review (an L3 case with the order evidence attached,
+  no screenshots asked). One-click fixes (refresh licenses, reset cloud settings) inside the
+  Battlefield 2042 diagnostics, capped per game per day. Secure Account Recovery: risk
+  signals are checked first (new device + region + recent email change goes straight to a
+  person, zero changes); otherwise two identity checks (email code, recent purchase),
+  a reset preview, then a receipt and a security checklist. "Can't sign in?" entry on My
+  Account. Confirmed actions run in the browser through `executeAction`, which re-checks
+  the rules; tests call it directly with ineligible and high-risk actions and confirm
+  nothing changes. Demo purchase and sign-in times are now relative to page load, so the
+  30-day restore window holds whenever the prototype is viewed.
+- **Phase 4 (live Claude): built; live run pending a key.** `api/agent.ts` serves one model
+  turn per request (`claude-opus-5-5`, low effort, strict tools, cached frozen prompt);
+  the browser runs the tool loop (`src/agent/live/`) against the same mock APIs and rules
+  engine as the demo, so L2 tools can only return preview cards. Citations are markers the
+  model copies from tool results and become chips only if a tool returned that source.
+  Card interactions and safety triggers stay deterministic; the model hears about them as
+  `[App event]` notes. Screenshots are downscaled in the browser and sent as image blocks
+  (live mode only). Limits: per-IP rate, player turns and conversation size, a daily spend
+  cap, and `AGENT_LIVE=off`. Any limit, a missing key or an upstream error switches the
+  session to the demo engine. `?agent=demo` forces the demo. Tests cover the endpoint, the
+  engine with a scripted transport, and the live → fallback → demo paths in the UI. The
+  20-case golden-set eval (`evals/`) is written but has not run: it needs a key and costs
+  about 20 low-effort requests.
 
 ## Decisions (confirmed)
 
@@ -52,8 +81,8 @@ src/agent/
   tools.ts                 tool registry: name, schema, autonomy level L0–L3, handler
   diagnostics/*.json       authored decision trees (AI picks the path, never invents steps)
   demo/                    intent router + scripted scenarios with timed status lines
-  live/client.ts           SSE client for /api/agent, falls back to demo on error/429/no key
-api/agent.ts               Vercel Node function: Claude tool loop → protocol events (SSE)
+  live/                    browser tool loop: transport, tool handlers, citations, live engine
+api/agent.ts               Vercel Node function: one Claude turn per request, limits, health check
 src/features/agent/        Help Agent UI (panel, composer, messages, cards)
 ```
 
@@ -61,17 +90,17 @@ src/features/agent/        Help Agent UI (panel, composer, messages, cards)
 
 `status` (narrated step, e.g. "Checking your Madden NFL 23 purchases…") ·
 `message` (text + citations to article ids, purchase records or policies) ·
-`card` (`restore_preview` | `receipt` | `diagnostic_step` | `case_draft` | `security_checklist` | `incident`) ·
+`card` (`action_preview` | `receipt` | `diagnostic` | `case_draft` | `identity_check` | `security_checklist` | `incident`) ·
 `handoff` (advisor greeting + summary) · `error` · `done`.
 
 ### Guardrails as code (from PRD "Trust, safety, and guardrails")
 
-| Level               | Engine behavior                                                                                                                                                                                                                                | UI                                   |
-| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
-| L0 Inform           | Read-only tools run automatically                                                                                                                                                                                                              | Cited answer                         |
-| L1 Suggest          | Returns step cards. Nothing changes until the player acts                                                                                                                                                                                      | `DiagnosticStepCard`                 |
-| L2 Act with confirm | The tool **never executes from the model**. It returns a _proposed action_. On the player's tap, the browser calls `executeAction(id)`, which **re-checks the rules engine** before applying and writes a receipt with a reference ID and undo | `RestorePreviewCard` → `ReceiptCard` |
-| L3 Human required   | Gathers context and drafts the case. No account change                                                                                                                                                                                         | `CaseDraftCard` → `HandoffCard`      |
+| Level               | Engine behavior                                                                                                                                                                                                                                | UI                                  |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| L0 Inform           | Read-only tools run automatically                                                                                                                                                                                                              | Cited answer                        |
+| L1 Suggest          | Returns step cards. Nothing changes until the player acts                                                                                                                                                                                      | `DiagnosticStepCard`                |
+| L2 Act with confirm | The tool **never executes from the model**. It returns a _proposed action_. On the player's tap, the browser calls `executeAction(id)`, which **re-checks the rules engine** before applying and writes a receipt with a reference ID and undo | `ActionPreviewCard` → `ReceiptCard` |
+| L3 Human required   | Gathers context and drafts the case. No account change                                                                                                                                                                                         | `CaseDraftCard` → `HandoffCard`     |
 
 - **Policy before model:** eligibility, grant caps (per player and per day) and value
   thresholds live in `policy/` as pure, unit-tested functions.
@@ -83,21 +112,34 @@ src/features/agent/        Help Agent UI (panel, composer, messages, cards)
 - **Always visible:** an "AI" badge in the panel chrome, an AI self-introduction in
   the first message, and a "Talk to a person" button at all times.
 
-### Live engine (`api/agent.ts`)
+### Live engine (`api/agent.ts` + `src/agent/live/`)
 
 - `@anthropic-ai/sdk`, model `claude-opus-5-5` (the default; see the cost note under
-  Open items), adaptive thinking, `output_config.effort: "low"` for chat latency,
-  streaming.
-- Manual tool loop rather than Tool Runner, because L2 calls must be intercepted and
-  turned into proposals. Tools use `strict: true`.
-- `fallbacks: "default"` (server-side refusal fallback). Prompt caching on the frozen
-  system prompt plus tool list.
-- Vision: dropped screenshots are sent as base64 image blocks so the model can extract
-  game, platform and error code.
-- Abuse and cost controls: per-IP rate limit, max turns and tokens per conversation, a
-  daily spend cap, and an `AGENT_LIVE` kill switch. Over any limit, the client falls
-  back to demo mode silently and shows a "Demo mode" chip.
-- Env: `ANTHROPIC_API_KEY`, `AGENT_LIVE`, `AGENT_DAILY_BUDGET_USD`, set in Vercel.
+  Open items). Thinking is always on for this model; `output_config.effort: "low"` keeps
+  chat latency down. Non-streaming: one turn is short, and the UI renders whole events.
+- **The browser runs the tool loop; the function runs one model turn.** The mock EA APIs
+  and the demo store live in the browser, so tools execute there and see the same state as
+  the UI. The function owns the key, the frozen system prompt, the tool schemas and the
+  limits; it rebuilds every message from known fields, so a client can't add a system
+  prompt, tools or other block types. Thinking blocks round-trip unchanged.
+- Tools use `strict: true` (nullable fields are `["string", "null"]`), and the browser
+  validates inputs again. L2 tools (`propose_restore`, `propose_license_refresh`,
+  `start_account_recovery`) return a preview card at most. High-risk recovery hands off
+  inside the tool, before the model sees the result.
+- No server-side refusal fallback: that feature targets Fable 5.1. A `refusal` turn is
+  dropped from the transcript and the player is offered a person.
+- Prompt caching: an explicit breakpoint on the frozen system prompt (tools render before
+  it) plus top-level automatic caching for the growing conversation. Player context is a
+  second, uncached system block.
+- Vision: screenshots are downscaled to 1280px JPEG in the browser and sent as base64
+  image blocks, so the model can read the game, platform and error code.
+- Abuse and cost controls: per-IP rate limit (20/min, 300/day), 12 player turns and a
+  size cap per conversation, a daily spend cap priced from `usage`, and the `AGENT_LIVE`
+  kill switch. Counters are in memory per function instance (best effort). Over any limit
+  the client switches to the demo engine and the panel shows "Demo mode".
+- Env: `ANTHROPIC_API_KEY`, `AGENT_LIVE` (`off` disables), `AGENT_DAILY_BUDGET_USD`
+  (default 5). Set them in Vercel; locally, put them in `.env.local` and `npm run dev`
+  serves `/api/agent` through a Vite middleware.
 
 ## Feature map (PRD capability → what gets built)
 
@@ -152,8 +194,10 @@ auto-drafted case, My Cases timeline, known-issue banner, secure recovery checkl
 
 ## Open items (decide when we reach them)
 
-- **Model and cost for the live agent.** The plan uses `claude-opus-5-5` at low effort.
-  A cheaper model (e.g. `claude-haiku-5-5`) would cut per-visitor cost; that's your call.
-- **Rate-limit store.** Vercel KV/Upstash (durable) or best-effort in-memory per instance.
+- **Model and cost for the live agent.** Uses `claude-opus-5-5` at low effort ($4/$20 per
+  MTok). A cheaper model (e.g. `claude-haiku-5-5`) would cut per-visitor cost; change
+  `AGENT_MODEL` and the prices in `api/agent.ts`. Your call.
+- **Rate-limit store.** Built in memory per instance (best effort). Vercel KV/Upstash would
+  make the limits and spend cap global.
 - **PRD open questions.** Whether the prototype visibly takes a position (e.g. a grant
   value threshold for L2→L3, or whether legacy/new boundaries are visible).

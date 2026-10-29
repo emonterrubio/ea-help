@@ -5,6 +5,8 @@ import { PageContainer } from '@/components/layout/PageContainer';
 import { PageHero } from '@/components/layout/PageHero';
 import { SectionHeading } from '@/components/layout/SectionHeading';
 import accountTools from '@/data/accountTools';
+import { AccountRecoveryCallout } from '@/features/account/AccountRecoveryCallout';
+import { useAiLayer } from '@/features/flags/aiLayer';
 import { useScrollToTop } from '@/hooks/useScrollToTop';
 import { capitalizeEachWord, capitalizeFirstLetter } from '@/lib/text';
 
@@ -12,11 +14,13 @@ import { capitalizeEachWord, capitalizeFirstLetter } from '@/lib/text';
 export const AccountPage = () => {
   useScrollToTop();
   const navigate = useNavigate();
+  const aiEnabled = useAiLayer();
 
   return (
     <div className="my-16">
       <PageHero img={violetGeometry} padding="sm:py-16 py-10 sm:px-10 px-6" title="My Account" />
       <PageContainer className="sm:mx-auto sm:px-10 px-6">
+        {aiEnabled && <AccountRecoveryCallout />}
         <section className="mt-10">
           <SectionHeading
             title={capitalizeEachWord('self-help tools')}

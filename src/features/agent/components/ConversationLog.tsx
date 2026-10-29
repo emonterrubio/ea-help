@@ -9,7 +9,7 @@ import { UserMessage } from './UserMessage';
 const ConversationEntry = ({ item }: { item: ConversationItem }) => {
   switch (item.kind) {
     case 'user':
-      return <UserMessage text={item.text} />;
+      return <UserMessage text={item.text} attachment={item.attachment} />;
     case 'status':
       return <StatusLine text={item.text} state={item.state} />;
     case 'message':

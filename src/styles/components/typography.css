@@ -1,23 +1,19 @@
 @layer components {
-  /* Typeface helper classes */
-  .electronicArtsTextLight {
-    font-family: ElectronicArtsTextLight;
+  /* Legacy typeface helpers. Display and Text both use Inter; the suffix picks the weight. */
+  .electronicArtsTextLight,
+  .electronicArtsDisplayLight {
+    font-family: var(--font-family-sans);
+    font-weight: 300;
   }
-  .electronicArtsTextRegular {
-    font-family: ElectronicArtsTextRegular;
+  .electronicArtsTextRegular,
+  .electronicArtsDisplayRegular {
+    font-family: var(--font-family-sans);
     font-weight: 400;
   }
-  .electronicArtsTextBold {
-    font-family: ElectronicArtsTextBold;
-  }
-  .electronicArtsDisplayLight {
-    font-family: ElectronicArtsDisplayLight;
-  }
-  .electronicArtsDisplayRegular {
-    font-family: ElectronicArtsDisplayRegular;
-  }
+  .electronicArtsTextBold,
   .electronicArtsDisplayBold {
-    font-family: ElectronicArtsDisplayBold;
+    font-family: var(--font-family-sans);
+    font-weight: 700;
   }
 
   /* Type scale */
@@ -25,24 +21,24 @@
     font-size: 1rem !important;
     line-height: 1.25rem !important;
     letter-spacing: 0.025rem !important;
-    font-family: ElectronicArtsTextRegular;
-    font-weight: normal;
+    font-family: var(--font-family-sans);
+    font-weight: 400;
   }
 
   .body-small {
     font-size: 0.875rem !important;
     line-height: 1.25rem !important;
     letter-spacing: 0.025rem !important;
-    font-family: ElectronicArtsTextRegular;
-    font-weight: normal;
+    font-family: var(--font-family-sans);
+    font-weight: 400;
   }
 
   .eyebrow-default {
     font-size: 0.75rem !important;
     line-height: 1.5rem !important;
     letter-spacing: 0.05rem !important;
-    font-family: ElectronicArtsTextRegular;
-    font-weight: bold;
+    font-family: var(--font-family-sans);
+    font-weight: 700;
     text-transform: uppercase;
   }
 }
